@@ -1,0 +1,61 @@
+.markdown-content {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  color: var(--text-light);
+  background-color: var(--card-bg);
+  border-radius: 12px;
+}
+
+.markdown-content h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--text-light);
+}
+
+.markdown-content h2 {
+  font-size: 1.8rem;
+  margin: 2rem 0 1rem;
+  color: var(--text-light);
+}
+
+.markdown-content p {
+  margin-bottom: 1rem;
+  line-height: 1.6;
+  color: var(--text-light);
+}
+
+.markdown-content ul, .markdown-content ol {
+  margin-bottom: 1rem;
+  padding-left: 2rem;
+  color: var(--text-light);
+}
+
+.markdown-content li {
+  margin-bottom: 0.5rem;
+  color: var(--text-light);
+}
+
+.markdown-content a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+.markdown-content a:hover {
+  text-decoration: underline;
+}
+
+.markdown-content code {
+  background-color: var(--accent);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
+  background-color: var(--accent);
+  padding: 1rem;
+  border-radius: 5px;
+  overflow-x: auto;
+  margin: 1rem 0;
+}

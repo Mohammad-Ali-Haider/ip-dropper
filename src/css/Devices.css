@@ -1,0 +1,172 @@
+.devices-container {
+  display: flex;
+  gap: 2rem;
+  height: calc(100vh - 180px);
+  color: var(--text-light);
+  position: relative;
+}
+
+.devices-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  max-height: 100%;
+}
+
+.devices-list-container {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem; /* Add space for scrollbar */
+  margin-bottom: 0.5rem;
+}
+
+.files-sidebar {
+  width: 300px;
+  background-color: var(--card-bg);
+  border-left: 1px solid var(--border-color);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.files-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.upload-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 2px dashed var(--border-color);
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+  min-height: 200px;
+  overflow-y: auto;
+}
+
+.send-button {
+  width: 100%;
+  padding: 0.6rem;
+  background-color: var(--accent);
+  color: var(--text-light);
+  border: none;
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 0.5rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.send-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--border-color);
+}
+
+.send-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.send-button:not(:disabled):active {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+.add-device-footer {
+  margin-top: auto;
+  padding: 0.75rem 0.75rem 0; /* Remove bottom padding */
+  background-color: var(--card-bg);
+  border-top: 1px solid var(--border-color);
+  width: 100%;
+}
+
+.add-device-footer .add-device-btn {
+  width: 100%;
+  margin: 0;
+  margin-bottom: 0.75rem; /* Add margin to button instead for spacing */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.add-device-btn {
+  background-color: var(--accent);
+  color: var(--text-light);
+  border: none;
+  padding: 0.8rem 1.5rem;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.add-device-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* File upload related styles */
+.file-input {
+  display: none;
+}
+
+.upload-label {
+  cursor: pointer;
+  padding: 0.6rem 1.2rem;
+  background-color: var(--accent);
+  color: var(--text-light);
+  border-radius: 6px;
+  font-weight: 600;
+  margin-top: 0.75rem;
+}
+
+.upload-icon {
+  font-size: 2.5rem;
+  color: var(--border-color);
+  margin-bottom: 0.75rem;
+}
+
+.selected-files {
+  width: 100%;
+  margin-top: 0.75rem;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  background-color: var(--sidebar-bg);
+  border-radius: 4px;
+  margin-bottom: 0.3rem;
+}
+
+.file-icon {
+  color: var(--text-light);
+}
+
+.file-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.remove-file-btn {
+  background: none;
+  border: none;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 0.2rem;
+}
+
+.remove-file-btn:hover {
+  color: #ff6b6b;
+}
