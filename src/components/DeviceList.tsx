@@ -37,7 +37,7 @@ function DeviceList({ devices, onDeleteDevice, onEditDevice, onDeviceSelection }
 
   return (
     <div className="device-list">
-      {devices.map((device, index) => (
+      {devices.map((device) => (
         <DeviceCard
           key={`${device.name}-${device.ipaddress}`}
           {...device}
