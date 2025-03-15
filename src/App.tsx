@@ -1,18 +1,31 @@
-import { useState } from "react";
-import Sidebar from "./components/Sidebar";
+import { useEffect, useState } from "react";
+import Sidebar from "./components/sidebar/Sidebar";
 import MainLayout from "./layouts/MainLayout";
-import SidebarContent from "./components/SidebarContent";
-import TabContent from "./components/TabContent";
-import { useDevices } from "./hooks/useDevices";
+import SidebarContent from "./components/sidebar/SidebarContent";
+import TabContent from "./components/common/TabContent";
 import { PAGES } from "./constants/navigation";
 import { ThemeProvider } from "./context/ThemeContext";
-import "./css/App.css";
-import "./css/markdown.css";
+import "./styles/App.css";
+import "./styles/markdown.css";
 
 function App() {
-  const [activeTab, setActiveTab] = useState(0);
-  const [isReceiving, setIsReceiving] = useState(false);
-  const { devices, setDevices } = useDevices();
+  const [activeTab, setActiveTab] = useState(() => {
+    const saved = localStorage.getItem("app.activeTab");
+    return saved ? JSON.parse(saved) : 0;
+  });
+  const [isReceiving, setIsReceiving] = useState(() => {
+    const saved = localStorage.getItem("app.isReceiving");
+    return saved ? JSON.parse(saved) : false;
+  });
+  // const { devices, setDevices } = useDevices();
+
+  useEffect(() => {
+    localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
+  }, [activeTab]);
+
+  useEffect(() => {
+    localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
+  }, [isReceiving]);
 
   const sidebarContent = (
     <Sidebar>
@@ -33,8 +46,8 @@ function App() {
           page={page}
           activeTab={activeTab}
           index={index}
-          devices={devices}
-          setDevices={setDevices}
+          // devices={devices}
+          // setDevices={setDevices}
         />
       ))}
     </div>
@@ -42,10 +55,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <MainLayout
-        sidebar={sidebarContent}
-        content={mainContent}
-      />
+      <MainLayout sidebar={sidebarContent} content={mainContent} />
     </ThemeProvider>
   );
 }

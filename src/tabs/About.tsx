@@ -1,11 +1,7 @@
-import MarkdownContent from '../components/MarkdownContent';
+import MarkdownContent from "../components/common/MarkdownContent";
 
 function About() {
-  return (
-    <div className="no-border">
-      <MarkdownContent contentPath="/src/content/about.md" />
-    </div>
-  );
+  return <MarkdownContent contentPath="/src/content/about.md" />;
 }
 
 export default About;

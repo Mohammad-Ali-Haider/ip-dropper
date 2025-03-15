@@ -11,6 +11,7 @@ IP Dropper is an open-source project developed to streamline network device mana
 ## Technologies
 
 Built with modern web technologies:
+
 - React
 - TypeScript
 - Electron
@@ -19,6 +20,7 @@ Built with modern web technologies:
 ## Contributing
 
 We welcome contributions! Visit our GitHub repository to:
+
 - Report issues
 - Submit pull requests
 - Suggest new features
@@ -27,5 +29,6 @@ We welcome contributions! Visit our GitHub repository to:
 ## Contact
 
 For support or inquiries, reach out to us:
+
 - GitHub: [github.com/ip-dropper](https://github.com/ip-dropper)
 - Email: support@ipdropper.com

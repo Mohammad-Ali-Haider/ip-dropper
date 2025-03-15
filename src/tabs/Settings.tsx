@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
-import "../css/Settings.css";
+import "../styles/Settings.css";
 
 function Settings() {
   const { theme, setTheme } = useTheme();

@@ -1,2 +1,13 @@
 {
+    "keyboard.shortcuts": [
+        {
+            "key": "cmd+r",
+            "command": "workbench.action.reloadWindow"
+        },
+        {
+            "key": "cmd+alt+r",
+            "command": "workbench.action.reloadWindow",
+            "args": { "forceReload": true }
+        }
+    ]
 }

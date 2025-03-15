@@ -1,5 +1,5 @@
-import "../css/ListGroup.css";
-import { PAGES, PageType } from "../constants/navigation";
+import "../../styles/ListGroup.css";
+import { PAGES } from "../../constants/navigation";
 
 interface Props {
   items: typeof PAGES;
@@ -15,7 +15,7 @@ function ListGroup({ items, selectedItem, onSelectItem }: Props) {
           key={item}
           onClick={() => onSelectItem(index)}
           className={`list-group-item list-group-item-action ${
-            selectedItem === index ? 'active' : ''
+            selectedItem === index ? "active" : ""
           }`}
         >
           {item}

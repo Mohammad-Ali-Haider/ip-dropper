@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import "../css/Sidebar.css";
+import "../../styles/Sidebar.css";
 
 interface Props {
   children: ReactNode;
@@ -8,9 +8,7 @@ interface Props {
 function Sidebar({ children }: Props) {
   return (
     <div className="sidebar-container">
-      <div className="sidebar-content">
-        {children}
-      </div>
+      <div className="sidebar-content">{children}</div>
     </div>
   );
 }

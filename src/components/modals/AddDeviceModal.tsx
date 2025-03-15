@@ -1,8 +1,12 @@
 import { useState } from "react";
-import { Device } from "../tabs/Devices";
-import BaseModal from "./modals/BaseModal";
-import DeviceForm from "./forms/DeviceForm";
-import "../css/AddDeviceModal.css";
+import { Device } from "../../types/device";
+import BaseModal from "./BaseModal";
+import DeviceForm from "../forms/DeviceForm";
+import {
+  validateIPAddress,
+  getUniqueDeviceName,
+} from "../../utils/deviceValidation";
+import "../../styles/AddDeviceModal.css";
 
 interface Props {
   show: boolean;
@@ -16,26 +20,6 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   const [ipaddress, setIpaddress] = useState("");
   const [type, setType] = useState<Device["type"]>("windows");
   const [error, setError] = useState<string | null>(null);
-
-  const validateIPAddress = (ip: string): boolean => {
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipRegex.test(ip)) return false;
-
-    const parts = ip.split(".").map(Number);
-    return parts.every((part) => part >= 0 && part <= 255);
-  };
-
-  const getUniqueDeviceName = (baseName: string): string => {
-    let newName = baseName;
-    let counter = 1;
-
-    while (existingDevices.some((device) => device.name === newName)) {
-      newName = `${baseName} (${counter})`;
-      counter++;
-    }
-
-    return newName;
-  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,13 +40,13 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
       return;
     }
 
-    const uniqueName = getUniqueDeviceName(name.trim());
+    const uniqueName = getUniqueDeviceName(name.trim(), existingDevices);
 
     const newDevice: Device = {
       name: uniqueName,
       ipaddress,
       type,
-      status: "online",
+      status: "offline",
     };
 
     onAdd(newDevice);
@@ -80,7 +64,6 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   return (
     <BaseModal show={show} onHide={handleClose} title="Add New Device">
       <form onSubmit={handleSubmit}>
-        {/* <StatusAlert variant="danger" message={error || ""} /> */}
         <DeviceForm
           name={name}
           setName={setName}

@@ -16,11 +16,8 @@ function FormSelect({ label, value, options, onChange }: FormSelectProps) {
   return (
     <Form.Group className="mb-3">
       <Form.Label>{label}</Form.Label>
-      <Form.Select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        {options.map(option => (
+      <Form.Select value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}
           </option>

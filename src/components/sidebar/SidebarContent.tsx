@@ -1,5 +1,5 @@
-import ListGroup from "./ListGroup";
-import { PAGES } from "../constants/navigation";
+import ListGroup from "../common/ListGroup";
+import { PAGES } from "../../constants/navigation";
 
 interface SidebarContentProps {
   isReceiving: boolean;
@@ -8,11 +8,11 @@ interface SidebarContentProps {
   setActiveTab: (index: number) => void;
 }
 
-function SidebarContent({ 
-  isReceiving, 
-  setIsReceiving, 
-  activeTab, 
-  setActiveTab 
+function SidebarContent({
+  isReceiving,
+  setIsReceiving,
+  activeTab,
+  setActiveTab,
 }: SidebarContentProps) {
   return (
     <>

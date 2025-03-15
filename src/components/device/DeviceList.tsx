@@ -1,7 +1,7 @@
 import DeviceCard from "./DeviceCard";
-import { Device } from "../types/device";
+import { Device } from "../../types/device";
 import { useState } from "react";
-import "../css/DeviceList.css";
+import "../../styles/DeviceList.css";
 
 interface Props {
   devices: Device[];
@@ -27,7 +27,6 @@ function DeviceList({ devices, onDeleteDevice, onEditDevice, onDeviceSelection }
     
     setSelectedDevices(newSelected);
 
-    // Convert Set of keys back to array of devices
     const selectedDevicesList = devices.filter(d => 
       newSelected.has(`${d.name}-${d.ipaddress}`)
     );

@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { Device } from "../tabs/Devices";
-import BaseModal from "./modals/BaseModal";
-import DeviceForm from "./forms/DeviceForm";
-import ConfirmationModal from "./modals/ConfirmationModal";
-import "../css/DeviceCard.css";
+import { Device } from "../../types/device";
+import BaseModal from "../modals/BaseModal";
+import DeviceForm from "../forms/DeviceForm";
+import ConfirmationModal from "../modals/ConfirmationModal";
+import {
+  validateIPAddress,
+  getUniqueDeviceName,
+} from "../../utils/deviceValidation";
+import "../../styles/DeviceCard.css";
 
 interface DeviceCardProps extends Device {
   isSelected?: boolean;
@@ -53,29 +57,6 @@ function DeviceCard({
       default:
         return "fa-computer";
     }
-  };
-
-  const validateIPAddress = (ip: string): boolean => {
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipRegex.test(ip)) return false;
-
-    const parts = ip.split(".").map(Number);
-    return parts.every((part) => part >= 0 && part <= 255);
-  };
-
-  const getUniqueDeviceName = (baseName: string, existingDevices: Device[]): string => {
-    let newName = baseName;
-    let counter = 1;
-
-    while (existingDevices.some(device => 
-      device.name === newName && 
-      (device.ipaddress !== ipaddress) // Allow same name if it's the same device being edited
-    )) {
-      newName = `${baseName} (${counter})`;
-      counter++;
-    }
-
-    return newName;
   };
 
   const handleEdit = (e: React.FormEvent) => {

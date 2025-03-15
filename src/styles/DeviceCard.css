@@ -103,7 +103,7 @@
 }
 
 .device-actions .edit-btn:hover {
-  color: var(--accent);
+  color: #006bb7;
 }
 
 .device-actions .delete-btn:hover {
