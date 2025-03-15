@@ -1,8 +1,18 @@
 {
-  "name": "project1",
-  "private": true,
-  "version": "0.0.0",
+  "name": "ip-dropper",
+  "private": false,
+  "version": "1.0.0",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mohammad-Ali-Haider/ip-dropper.git"
+  },
+  "author": "Mohammad Ali Haider",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Mohammad-Ali-Haider/ip-dropper/issues"
+  },
+  "homepage": "https://github.com/Mohammad-Ali-Haider/ip-dropper#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
