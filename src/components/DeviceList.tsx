@@ -1,5 +1,5 @@
 import DeviceCard from "./DeviceCard";
-import { Device } from "../tabs/Devices";
+import { Device } from "../types/device";
 import { useState } from "react";
 import "../css/DeviceList.css";
 
@@ -28,9 +28,9 @@ function DeviceList({ devices, onDeleteDevice, onEditDevice, onDeviceSelection }
     setSelectedDevices(newSelected);
 
     // Convert Set of keys back to array of devices
-    const selectedDevicesList = Array.from(newSelected)
-      .map(key => devices.find(d => `${d.name}-${d.ipaddress}` === key))
-      .filter((d): d is Device => d !== undefined);
+    const selectedDevicesList = devices.filter(d => 
+      newSelected.has(`${d.name}-${d.ipaddress}`)
+    );
     
     onDeviceSelection(selectedDevicesList);
   };
@@ -42,7 +42,7 @@ function DeviceList({ devices, onDeleteDevice, onEditDevice, onDeviceSelection }
           key={`${device.name}-${device.ipaddress}`}
           {...device}
           isSelected={selectedDevices.has(`${device.name}-${device.ipaddress}`)}
-          onSelect={handleDeviceSelect}
+          onSelect={() => handleDeviceSelect(device)}
           onDelete={onDeleteDevice}
           onEdit={onEditDevice}
           existingDevices={devices}

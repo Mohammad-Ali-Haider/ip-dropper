@@ -2,14 +2,10 @@ import { useState } from "react";
 import DeviceList from "../components/DeviceList";
 import Button from "../components/Button";
 import AddDeviceModal from "../components/AddDeviceModal";
+import { UploadArea } from "../components/FileUpload/UploadArea";
+import { useFileSelection } from "../hooks/useFileSelection";
+import { Device } from "../types/device";
 import "../css/Devices.css";
-
-export interface Device {
-  name: string;
-  ipaddress: string;
-  type: "windows" | "mac" | "linux";
-  status: "online" | "offline";
-}
 
 interface Props {
   devices: Device[];
@@ -19,7 +15,12 @@ interface Props {
 function Devices({ devices, setDevices }: Props) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const { 
+    selectedFiles, 
+    handleFileChange, 
+    handleRemoveFile, 
+    clearFiles 
+  } = useFileSelection();
 
   const handleAddDevice = (newDevice: Device) => {
     setDevices([...devices, newDevice]);
@@ -40,30 +41,14 @@ function Devices({ devices, setDevices }: Props) {
     ));
   };
 
-  const handleDeviceSelection = (selectedDevices: Device[]) => {
-    setSelectedDevices(selectedDevices);
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const filesArray = Array.from(event.target.files);
-      setSelectedFiles(prev => [...prev, ...filesArray]);
-    }
-  };
-
-  const handleRemoveFile = (fileToRemove: File) => {
-    setSelectedFiles(prev => 
-      prev.filter(file => file !== fileToRemove)
-    );
+  const handleDeviceSelection = (devices: Device[]) => {
+    setSelectedDevices(devices);
   };
 
   const handleSendFiles = () => {
-    // Implement your file sending logic here
     console.log('Sending files:', selectedFiles);
     console.log('To devices:', selectedDevices);
-    
-    // Clear selected files after sending
-    setSelectedFiles([]);
+    clearFiles();
   };
 
   return (
@@ -92,36 +77,11 @@ function Devices({ devices, setDevices }: Props) {
 
       <div className="files-sidebar">
         <div className="files-content">
-          <div className="upload-area">
-            <i className="fas fa-cloud-upload-alt upload-icon"></i>
-            <input
-              type="file"
-              multiple
-              onChange={handleFileChange}
-              className="file-input"
-              id="file-input"
-            />
-            <label htmlFor="file-input" className="upload-label">
-              Choose Files
-            </label>
-            {selectedFiles.length > 0 && (
-              <div className="selected-files">
-                {selectedFiles.map((file, index) => (
-                  <div key={index} className="file-item">
-                    <i className="fas fa-file file-icon"></i>
-                    <span className="file-name">{file.name}</span>
-                    <button 
-                      className="remove-file-btn"
-                      onClick={() => handleRemoveFile(file)}
-                      title="Remove file"
-                    >
-                      <i className="fas fa-times"></i>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <UploadArea
+            selectedFiles={selectedFiles}
+            onFileChange={handleFileChange}
+            onRemoveFile={handleRemoveFile}
+          />
           <button
             className="send-button"
             disabled={selectedDevices.length === 0 || selectedFiles.length === 0}

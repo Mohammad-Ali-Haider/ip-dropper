@@ -1,7 +1,8 @@
 import "../css/ListGroup.css";
+import { PAGES, PageType } from "../constants/navigation";
 
 interface Props {
-  items: string[];
+  items: typeof PAGES;
   selectedItem: number;
   onSelectItem: (index: number) => void;
 }
