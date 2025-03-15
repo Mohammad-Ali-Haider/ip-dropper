@@ -29,11 +29,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Editor directories and files
-.vscode/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-!.vscode/launch.json
+.vscode/           # This will ignore the entire .vscode folder
 .idea/
 .DS_Store
 *.suo
