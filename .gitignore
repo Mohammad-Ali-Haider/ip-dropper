@@ -1,26 +1,26 @@
 # Dependencies
-node_modules
+node_modules/
 .pnp
 .pnp.js
 
 # Build outputs
-dist
-dist-ssr
+dist/
+dist-ssr/
+build/
 *.local
 
 # Testing
-coverage
+coverage/
 *.lcov
+.nyc_output/
 
 # Environment files
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
 # Logs
-logs
+logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -32,13 +32,41 @@ lerna-debug.log*
 .vscode/*
 !.vscode/extensions.json
 !.vscode/settings.json
-.idea
+!.vscode/launch.json
+.idea/
 .DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+.history/
+*.sublime-workspace
+*.sublime-project
 
 # TypeScript
 *.tsbuildinfo
+tsconfig.tsbuildinfo
+
+# Cache and temp files
+.cache/
+.temp/
+.tmp/
+.eslintcache
+.stylelintcache
+
+# Package manager specific
+.npm/
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnpm-store/
+
+# OS specific
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
