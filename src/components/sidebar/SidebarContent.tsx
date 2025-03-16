@@ -1,4 +1,5 @@
 import ListGroup from "../common/ListGroup";
+import YourDeviceCard from "../device/YourDeviceCard";
 import { PAGES } from "../../constants/navigation";
 
 interface SidebarContentProps {
@@ -32,6 +33,7 @@ function SidebarContent({
         selectedItem={activeTab}
         onSelectItem={setActiveTab}
       />
+      <YourDeviceCard />
     </>
   );
 }

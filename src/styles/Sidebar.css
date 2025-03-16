@@ -12,10 +12,17 @@
   position: fixed;
   height: 100vh;
   width: 320px;
-  overflow-y: auto;
   z-index: 1000;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
   padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .sidebar-title {
