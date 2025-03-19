@@ -57,60 +57,31 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const clientIP = req.socket.remoteAddress;
   console.log(`\nNew connection from ${clientIP}`);
 
-  let writeStream: fs.WriteStream | null = null;
-  let bytesReceived = 0;
-  let expectedSize = 0;
-  let currentFile = '';
+  ws.on('message', (data: WebSocket.Data) => {
+    console.log('Raw message received:', data.toString());
+    
+    try {
+      const message = JSON.parse(data.toString());
+      console.log('Parsed message:', message);
 
-  ws.on('message', (data: WebSocket.Data, isBinary: boolean) => {
-    if (!isBinary) {
-      try {
-        const message = JSON.parse(data.toString());
-        console.log('Received message:', message);
-
-        if (message.type === 'ping') {
-          // Respond to ping with pong
-          ws.send(JSON.stringify({
-            type: 'pong',
-            deviceId: message.deviceId
-          }));
-          return;
-        }
-
-        if (message.type === 'metadata' && message.filename && message.size) {
-          currentFile = path.basename(message.filename);
-          const filePath = path.join(UPLOADS_DIR, currentFile);
-          console.log(`\nReceiving file: ${currentFile}`);
-          console.log(`Expected size: ${message.size} bytes`);
-          writeStream = fs.createWriteStream(filePath);
-          expectedSize = message.size;
-          bytesReceived = 0;
-        } else if (message.type === 'end') {
-          console.log('\nReceived end signal');
-          writeStream?.end();
-          console.log(`Transfer complete! Received ${bytesReceived} bytes`);
-        }
-      } catch (err) {
-        console.error('Error processing message:', err);
+      if (message.type === 'ping') {
+        console.log('Sending pong response to:', message.deviceId);
+        ws.send(JSON.stringify({
+          type: 'pong',
+          deviceId: message.deviceId
+        }));
       }
-    } else if (writeStream && Buffer.isBuffer(data)) {
-      bytesReceived += data.length;
-      writeStream.write(data);
-      const progress = Math.round((bytesReceived / expectedSize) * 100);
-      process.stdout.write(`\rProgress: ${progress}% (${bytesReceived}/${expectedSize} bytes)`);
-    } else {
-      console.error('Received binary data before metadata!');
+    } catch (error) {
+      console.error('Error processing message:', error);
     }
   });
 
-  ws.on('error', (err: Error) => {
-    console.error('WebSocket error:', err);
-    writeStream?.destroy();
+  ws.on('error', (error) => {
+    console.error('WebSocket connection error:', error);
   });
 
   ws.on('close', () => {
-    console.log(`\nConnection from ${clientIP} closed`);
-    writeStream?.end();
+    console.log('Client disconnected:', clientIP);
   });
 });
 
@@ -118,6 +89,7 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 wss.on('error', (error: Error) => {
   console.error('Server error:', error);
 });
+
 
 
 

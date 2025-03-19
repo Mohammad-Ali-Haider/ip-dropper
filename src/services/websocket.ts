@@ -39,14 +39,18 @@ export class WebSocketService {
     if (!this.ws) return;
 
     this.ws.onmessage = (event) => {
+      console.log('Received WebSocket message:', event.data);
+      
       try {
         const message = JSON.parse(event.data);
+        console.log('Parsed message:', message);
+        
         if (message.type === 'pong') {
+          console.log('Received pong from:', message.deviceId);
           const timeoutId = this.pingTimeouts.get(message.deviceId);
           if (timeoutId) {
             clearTimeout(timeoutId);
             this.pingTimeouts.delete(message.deviceId);
-            // Device is online
             this.emit('deviceStatus', { deviceId: message.deviceId, status: 'online' });
           }
         }
@@ -111,12 +115,16 @@ export class WebSocketService {
   pingDevice(deviceId: string): Promise<boolean> {
     return new Promise((resolve, reject) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        console.error('WebSocket not connected when trying to ping:', deviceId);
         reject(new Error('WebSocket is not connected'));
         return;
       }
 
+      console.log('Sending ping to device:', deviceId);
+
       // Set up timeout for ping response
       const timeoutId = setTimeout(() => {
+        console.log('Ping timeout for device:', deviceId);
         this.pingTimeouts.delete(deviceId);
         resolve(false);
       }, 5000); // 5 second timeout
@@ -131,7 +139,9 @@ export class WebSocketService {
 
       try {
         this.ws.send(JSON.stringify(pingMessage));
+        console.log('Ping message sent successfully');
       } catch (error) {
+        console.error('Error sending ping:', error);
         clearTimeout(timeoutId);
         this.pingTimeouts.delete(deviceId);
         reject(error);
@@ -162,4 +172,5 @@ export class WebSocketService {
 
 // Export a singleton instance
 export const wsService = new WebSocketService();
+
 
