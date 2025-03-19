@@ -12,11 +12,30 @@ export class WebSocketService {
         const wsUrl = import.meta.env.DEV ? 'ws://localhost:8080' : 'ws://' + window.location.host;
         this.ws = new WebSocket(wsUrl);
 
+        // Add connection timeout
+        const connectionTimeout = setTimeout(() => {
+          if (this.ws?.readyState !== WebSocket.OPEN) {
+            this.ws?.close();
+            reject(new Error('Connection timeout'));
+          }
+        }, 5000);
+
         this.ws.onopen = () => {
           console.log('WebSocket connected');
+          clearTimeout(connectionTimeout);
           this.setupMessageHandlers();
           this.reconnectAttempts = 0;
           this.reconnectTimeout = 1000;
+          
+          // Add periodic connection check
+          setInterval(() => {
+            if (this.ws?.readyState === WebSocket.OPEN) {
+              this.ws.send(JSON.stringify({ type: 'heartbeat' }));
+            } else {
+              this.attemptReconnect();
+            }
+          }, 30000);
+          
           resolve();
         };
 

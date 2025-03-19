@@ -14,12 +14,28 @@ export function useDeviceStatus(devices: Device[]) {
 
       for (const device of devices) {
         try {
-          const isOnline = await wsService.pingDevice(device.ipaddress);
-          if (isOnline && mounted) {
-            newOnlineDevices.add(device.ipaddress);
+          // Add retry logic
+          let retryCount = 0;
+          const maxRetries = 2;
+          
+          while (retryCount < maxRetries) {
+            try {
+              const isOnline = await wsService.pingDevice(device.ipaddress);
+              if (isOnline && mounted) {
+                newOnlineDevices.add(device.ipaddress);
+                break;
+              }
+            } catch (error) {
+              retryCount++;
+              if (retryCount === maxRetries) {
+                console.log(`Device ${device.ipaddress} appears to be offline after ${maxRetries} attempts`);
+              }
+              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            }
           }
         } catch (error) {
-          console.log(`Device ${device.ipaddress} appears to be offline`);
+          console.error(`Error checking device ${device.ipaddress}:`, error);
         }
       }
 

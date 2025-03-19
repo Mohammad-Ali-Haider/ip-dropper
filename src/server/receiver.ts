@@ -56,6 +56,13 @@ console.log(`\nServer listening on port ${PORT}`);
 wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const clientIP = req.socket.remoteAddress;
   console.log(`\nNew connection from ${clientIP}`);
+  
+  // Add ping/pong heartbeat
+  const pingInterval = setInterval(() => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.ping();
+    }
+  }, 30000); // Send ping every 30 seconds
 
   ws.on('message', (data: WebSocket.Data) => {
     console.log('Raw message received:', data.toString());
@@ -78,10 +85,12 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
   ws.on('error', (error) => {
     console.error('WebSocket connection error:', error);
+    clearInterval(pingInterval);
   });
 
   ws.on('close', () => {
     console.log('Client disconnected:', clientIP);
+    clearInterval(pingInterval);
   });
 });
 
