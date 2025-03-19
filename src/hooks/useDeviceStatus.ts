@@ -4,17 +4,20 @@ import { wsService } from '../services/websocket';
 
 export function useDeviceStatus(devices: Device[]) {
   const [onlineDevices, setOnlineDevices] = useState<Set<string>>(new Set());
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     let intervalId: NodeJS.Timeout;
     let mounted = true;
 
     const checkDeviceStatus = async () => {
+      if (isChecking) return;
+      setIsChecking(true);
+
       const newOnlineDevices = new Set<string>();
 
       for (const device of devices) {
         try {
-          // Add retry logic
           let retryCount = 0;
           const maxRetries = 2;
           
@@ -25,12 +28,13 @@ export function useDeviceStatus(devices: Device[]) {
                 newOnlineDevices.add(device.ipaddress);
                 break;
               }
-            } catch (error) {
               retryCount++;
               if (retryCount === maxRetries) {
                 console.log(`Device ${device.ipaddress} appears to be offline after ${maxRetries} attempts`);
               }
-              // Wait before retry
+              await new Promise(resolve => setTimeout(resolve, 1000));
+            } catch (error) {
+              retryCount++;
               await new Promise(resolve => setTimeout(resolve, 1000));
             }
           }
@@ -41,6 +45,7 @@ export function useDeviceStatus(devices: Device[]) {
 
       if (mounted) {
         setOnlineDevices(newOnlineDevices);
+        setIsChecking(false);
       }
     };
 

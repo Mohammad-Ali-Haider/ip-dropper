@@ -1,10 +1,32 @@
 export class WebSocketService {
   private ws: WebSocket | null = null;
+  private isConnecting: boolean = false;
+  private connectionPromise: Promise<void> | null = null;
   private pingTimeouts: Map<string, NodeJS.Timeout> = new Map();
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 5;
   private reconnectTimeout = 1000;
   private eventListeners: Map<string, ((data: any) => void)[]> = new Map();
+
+  private async ensureConnection(): Promise<void> {
+    if (this.ws?.readyState === WebSocket.OPEN) {
+      return;
+    }
+
+    if (this.isConnecting) {
+      return this.connectionPromise;
+    }
+
+    this.isConnecting = true;
+    this.connectionPromise = this.connect();
+
+    try {
+      await this.connectionPromise;
+    } finally {
+      this.isConnecting = false;
+      this.connectionPromise = null;
+    }
+  }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -62,10 +84,8 @@ export class WebSocketService {
       
       try {
         const message = JSON.parse(event.data);
-        console.log('Parsed message:', message);
         
         if (message.type === 'pong') {
-          console.log('Received pong from:', message.deviceId);
           const timeoutId = this.pingTimeouts.get(message.deviceId);
           if (timeoutId) {
             clearTimeout(timeoutId);
@@ -132,38 +152,38 @@ export class WebSocketService {
   }
 
   pingDevice(deviceId: string): Promise<boolean> {
-    return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        console.error('WebSocket not connected when trying to ping:', deviceId);
-        reject(new Error('WebSocket is not connected'));
-        return;
-      }
-
-      console.log('Sending ping to device:', deviceId);
-
-      // Set up timeout for ping response
-      const timeoutId = setTimeout(() => {
-        console.log('Ping timeout for device:', deviceId);
-        this.pingTimeouts.delete(deviceId);
-        resolve(false);
-      }, 5000); // 5 second timeout
-
-      this.pingTimeouts.set(deviceId, timeoutId);
-
-      // Send ping message
-      const pingMessage = {
-        type: 'ping',
-        deviceId
-      };
-
+    return new Promise(async (resolve, reject) => {
       try {
+        await this.ensureConnection();
+        
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+          console.error('WebSocket not connected when trying to ping:', deviceId);
+          resolve(false);
+          return;
+        }
+
+        console.log('Sending ping to device:', deviceId);
+
+        // Set up timeout for ping response
+        const timeoutId = setTimeout(() => {
+          console.log('Ping timeout for device:', deviceId);
+          this.pingTimeouts.delete(deviceId);
+          resolve(false);
+        }, 5000); // 5 second timeout
+
+        this.pingTimeouts.set(deviceId, timeoutId);
+
+        // Send ping message
+        const pingMessage = {
+          type: 'ping',
+          deviceId
+        };
+
         this.ws.send(JSON.stringify(pingMessage));
         console.log('Ping message sent successfully');
       } catch (error) {
-        console.error('Error sending ping:', error);
-        clearTimeout(timeoutId);
-        this.pingTimeouts.delete(deviceId);
-        reject(error);
+        console.error('Error in pingDevice:', error);
+        resolve(false);
       }
     });
   }

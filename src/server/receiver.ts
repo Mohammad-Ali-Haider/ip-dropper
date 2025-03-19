@@ -57,12 +57,22 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
   const clientIP = req.socket.remoteAddress;
   console.log(`\nNew connection from ${clientIP}`);
   
-  // Add ping/pong heartbeat
+  // Add ping/pong heartbeat with shorter interval
   const pingInterval = setInterval(() => {
     if (ws.readyState === WebSocket.OPEN) {
       ws.ping();
     }
-  }, 30000); // Send ping every 30 seconds
+  }, 15000); // Send ping every 15 seconds
+
+  // Add pong timeout handler
+  let pongTimeout: NodeJS.Timeout;
+  ws.on('ping', () => {
+    ws.pong();
+  });
+
+  ws.on('pong', () => {
+    clearTimeout(pongTimeout);
+  });
 
   ws.on('message', (data: WebSocket.Data) => {
     console.log('Raw message received:', data.toString());
@@ -73,10 +83,12 @@ wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
 
       if (message.type === 'ping') {
         console.log('Sending pong response to:', message.deviceId);
-        ws.send(JSON.stringify({
-          type: 'pong',
-          deviceId: message.deviceId
-        }));
+        if (ws.readyState === WebSocket.OPEN) {
+          ws.send(JSON.stringify({
+            type: 'pong',
+            deviceId: message.deviceId
+          }));
+        }
       }
     } catch (error) {
       console.error('Error processing message:', error);
