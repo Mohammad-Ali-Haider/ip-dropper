@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Device } from "../../types/device";
+import { Device, DeviceType } from "../../types/device";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -46,16 +46,20 @@ function DeviceCard({
     }
   };
 
-  const getDeviceIcon = (deviceType: Device["type"]) => {
-    switch (deviceType) {
-      case "windows":
-        return "fa-windows";
-      case "mac":
-        return "fa-apple";
-      case "linux":
-        return "fa-linux";
+  const getDeviceIcon = (type: DeviceType): string => {
+    switch (type) {
+      case 'windows':
+        return 'fa-windows';
+      case 'mac':
+        return 'fa-apple';
+      case 'linux':
+        return 'fa-linux';
+      case 'mobile':
+        return 'fa-mobile-alt';
+      case 'tablet':
+        return 'fa-tablet-alt';
       default:
-        return "fa-computer";
+        return 'fa-desktop';
     }
   };
 

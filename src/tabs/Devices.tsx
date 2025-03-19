@@ -1,19 +1,27 @@
-import { useState } from "react";
+import { useState } from 'react';
 import DeviceList from "../components/device/DeviceList";
 import Button from "../components/common/Button";
 import AddDeviceModal from "../components/modals/AddDeviceModal";
-import { UploadArea } from "../components/fileupload/UploadArea";
+import { UploadArea } from "../components/FileUpload/UploadArea";
 import { useFileSelection } from "../hooks/useFileSelection";
 import { useDevices } from "../hooks/useDevices";
-import { Device } from "../types/device";
+import { useDeviceStatus } from "../hooks/useDeviceStatus";
+import { Device, DeviceStatus } from "../types/device";
 import "../styles/Devices.css";
 
 function Devices() {
   const { devices, setDevices } = useDevices();
+  const onlineDevices = useDeviceStatus(devices);
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
   const { selectedFiles, handleFileChange, handleRemoveFile, clearFiles } =
     useFileSelection();
+
+  // Update devices with online status
+  const devicesWithStatus: Device[] = devices.map(device => ({
+    ...device,
+    status: onlineDevices.has(device.ipaddress) ? 'online' as DeviceStatus : 'offline' as DeviceStatus
+  }));
 
   const handleAddDevice = (newDevice: Device) => {
     setDevices([...devices, newDevice]);
@@ -55,7 +63,7 @@ function Devices() {
       <div className="devices-main">
         <div className="devices-list-container">
           <DeviceList
-            devices={devices}
+            devices={devicesWithStatus}
             onDeleteDevice={handleDeleteDevice}
             onEditDevice={handleEditDevice}
             onDeviceSelection={handleDeviceSelection}

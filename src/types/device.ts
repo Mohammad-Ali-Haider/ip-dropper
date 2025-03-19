@@ -1,5 +1,5 @@
-export type DeviceType = "windows" | "mac" | "linux";
-export type DeviceStatus = "online" | "offline";
+export type DeviceStatus = 'online' | 'offline';
+export type DeviceType = 'windows' | 'mac' | 'linux' | 'mobile' | 'tablet' | 'other';
 
 export interface Device {
   name: string;

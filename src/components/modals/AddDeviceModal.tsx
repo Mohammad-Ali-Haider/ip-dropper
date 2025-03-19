@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Device } from "../../types/device";
+import { useState } from 'react';
+import { Device, DeviceType } from '../../types/device';
 import BaseModal from "./BaseModal";
 import DeviceForm from "../forms/DeviceForm";
 import {
@@ -8,18 +8,24 @@ import {
 } from "../../utils/deviceValidation";
 import "../../styles/AddDeviceModal.css";
 
-interface Props {
+interface AddDeviceModalProps {
   show: boolean;
   onHide: () => void;
   onAdd: (device: Device) => void;
   existingDevices: Device[];
 }
 
-function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
-  const [name, setName] = useState("");
-  const [ipaddress, setIpaddress] = useState("");
-  const [type, setType] = useState<Device["type"]>("windows");
+function AddDeviceModal({ show, onHide, onAdd, existingDevices }: AddDeviceModalProps) {
+  const [name, setName] = useState('');
+  const [ipaddress, setIpaddress] = useState('');
+  const [type, setType] = useState<DeviceType>('other');
   const [error, setError] = useState<string | null>(null);
+
+  const resetForm = () => {
+    setName('');
+    setIpaddress('');
+    setType('other');
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,9 +60,7 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   };
 
   const handleClose = () => {
-    setName("");
-    setIpaddress("");
-    setType("windows");
+    resetForm();
     setError(null);
     onHide();
   };
