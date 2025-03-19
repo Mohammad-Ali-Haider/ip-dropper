@@ -170,3 +170,31 @@
 .remove-file-btn:hover {
   color: #ff6b6b;
 }
+
+.transfer-status {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border-color);
+  padding-top: 1rem;
+}
+
+.status-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-radius: 4px;
+  background-color: var(--sidebar-bg);
+}
+
+.status-item.success {
+  color: #28a745;
+}
+
+.status-item.error {
+  color: #dc3545;
+}
+
+.status-item i {
+  margin-left: 0.5rem;
+}

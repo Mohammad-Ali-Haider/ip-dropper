@@ -7,6 +7,7 @@ import { useFileSelection } from "../hooks/useFileSelection";
 import { useDevices } from "../hooks/useDevices";
 import { Device } from "../types/device";
 import "../styles/Devices.css";
+import { FileTransferService } from '../services/FileTransferService';
 
 function Devices() {
   const { devices, setDevices } = useDevices();
@@ -14,6 +15,8 @@ function Devices() {
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
   const { selectedFiles, handleFileChange, handleRemoveFile, clearFiles } =
     useFileSelection();
+  const [transferStatus, setTransferStatus] = useState<Map<string, boolean>>(new Map());
+  const fileTransferService = new FileTransferService();
 
   const handleAddDevice = (newDevice: Device) => {
     setDevices([...devices, newDevice]);
@@ -44,10 +47,25 @@ function Devices() {
     setSelectedDevices(devices);
   };
 
-  const handleSendFiles = () => {
-    console.log("Sending files:", selectedFiles);
-    console.log("To devices:", selectedDevices);
-    clearFiles();
+  const handleSendFiles = async () => {
+    setTransferStatus(new Map()); // Reset status
+    
+    try {
+      const results = await fileTransferService.sendFilesToDevices(
+        selectedFiles,
+        selectedDevices
+      );
+      
+      setTransferStatus(results);
+      clearFiles(); // Clear files after successful transfer
+      
+      // Show success message
+      const successCount = Array.from(results.values()).filter(v => v).length;
+      alert(`Files sent successfully to ${successCount} out of ${selectedDevices.length} devices`);
+    } catch (error) {
+      console.error('Error sending files:', error);
+      alert('Error sending files. Please check the console for details.');
+    }
   };
 
   return (
@@ -83,15 +101,25 @@ function Devices() {
           />
           <button
             className="send-button"
-            disabled={
-              selectedDevices.length === 0 || selectedFiles.length === 0
-            }
+            disabled={selectedDevices.length === 0 || selectedFiles.length === 0}
             onClick={handleSendFiles}
           >
             Send Files
             {selectedDevices.length > 0 &&
               ` (${selectedDevices.length} devices selected)`}
           </button>
+          
+          {/* Transfer Status */}
+          {transferStatus.size > 0 && (
+            <div className="transfer-status">
+              {Array.from(transferStatus.entries()).map(([ip, success]) => (
+                <div key={ip} className={`status-item ${success ? 'success' : 'error'}`}>
+                  <span>{ip}</span>
+                  <i className={`fas fa-${success ? 'check' : 'times'}`}></i>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -46,7 +46,7 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
       name: uniqueName,
       ipaddress,
       type,
-      status: "offline",
+      status: "online",
     };
 
     onAdd(newDevice);

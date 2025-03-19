@@ -25,7 +25,8 @@
     "react-bootstrap": "^2.10.9",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
+    "remark-gfm": "^4.0.1",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
