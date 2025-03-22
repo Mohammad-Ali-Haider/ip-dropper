@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+    <title>Vite + React + TS</title>
+    <style>
+      /* Default dark theme as fallback */
+      :root {
+        --bg-dark: #121212;
+        --sidebar-bg: #1E1E1E;
+        --card-bg: #2E2E2E;
+        --accent: #3A3A3A;
+        --text-light: #E0E0E0;
+        --border-color: #444444;
+      }
+      
+      html, body {
+        margin: 0;
+        background-color: var(--bg-dark);
+        color: var(--text-light);
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
