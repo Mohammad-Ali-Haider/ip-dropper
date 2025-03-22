@@ -25,7 +25,6 @@ class DeviceManager {
         const deviceId = `${device.name}-${device.ipaddress}`;
         this.devices.set(deviceId, {
           ...device,
-          isReceiving: device.isReceiving || false,
           status: 'online'
         });
       });
@@ -48,8 +47,7 @@ class DeviceManager {
         name: device.name,
         ipaddress: device.ipaddress,
         type: device.type,
-        status: device.status,
-        isReceiving: device.isReceiving
+        status: device.status
       }));
       await fs.writeFile(this.storageFile, JSON.stringify(devices, null, 2));
       console.log(`Saved ${devices.length} devices to storage`);
@@ -63,8 +61,7 @@ class DeviceManager {
     console.log(`Adding new device: ${deviceId}`);
     this.devices.set(deviceId, {
       ...device,
-      status: 'offline',  // Set to offline by default
-      isReceiving: false
+      status: 'offline'
     });
     
     const savedDevice = this.devices.get(deviceId);
@@ -88,33 +85,6 @@ class DeviceManager {
 
   cleanup() {
     this.saveDevices();
-  }
-
-  updateDeviceReceiving(name, ipaddress, isReceiving) {
-    const deviceId = `${name}-${ipaddress}`;
-    console.log(`Updating receiving status for device: ${deviceId} to ${isReceiving}`);
-    
-    let device = this.devices.get(deviceId);
-    
-    // If device doesn't exist, create it
-    if (!device) {
-      device = this.addDevice({
-        name,
-        ipaddress,
-        type: 'unknown', // You might want to detect this
-        status: 'online',
-        isReceiving: false
-      });
-    }
-
-    const updatedDevice = {
-      ...device,
-      isReceiving
-    };
-    
-    this.devices.set(deviceId, updatedDevice);
-    this.saveDevices();
-    return updatedDevice;
   }
 }
 

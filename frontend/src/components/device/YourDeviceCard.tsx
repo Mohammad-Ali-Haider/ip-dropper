@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { DeviceType } from '../../types/device';
 import '../../styles/YourDeviceCard.css';
+import { API_BASE_URL } from '../../constants/api';
 
 function YourDeviceCard() {
   const [ipAddress, setIpAddress] = useState<string>('Loading...');
@@ -10,7 +11,8 @@ function YourDeviceCard() {
   useEffect(() => {
     const fetchDeviceInfo = async () => {
       try {
-        const response = await fetch('http://localhost:3000/api/devices/current', {
+        const response = await fetch(`${API_BASE_URL}/api/devices/current`, {
+          method: 'GET',
           headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',

@@ -7,11 +7,3 @@ export const validateDeviceFields = (req, res, next) => {
   
   next();
 };
-
-export const validateReceivingStatus = (req, res, next) => {
-  if (typeof req.body.isReceiving !== 'boolean') {
-    return res.status(400).json({ error: 'isReceiving must be a boolean' });
-  }
-  
-  next();
-};
