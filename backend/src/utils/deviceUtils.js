@@ -1,4 +1,4 @@
-import os from "os";
+import os from 'os';
 
 function getOS() {
   let deviceType = "windows";
@@ -15,20 +15,25 @@ function getOS() {
 
 function getIP() {
   const interfaces = os.networkInterfaces();
-  Object.keys(interfaces).forEach((ifname) => {
-    interfaces[ifname].forEach((iface) => {
-      if (iface.family === "IPv4" && !iface.internal) {
-        return iface.address;
-      }
-    });
-  });
+  const validInterface = Object.values(interfaces)
+    .flat()
+    .find(
+      (iface) =>
+        iface.family === "IPv4" &&
+        !iface.internal &&
+        iface.address !== "127.0.0.1"
+    );
+
+  if (!validInterface) {
+    return "127.0.0.1";
+  }
+
+  return validInterface.address;
 }
 
 export async function getDeviceInfo() {
   try {
     const ipAddress = getIP();
-    if (!ipAddress) throw new Error("No valid network interface found");
-
     const deviceType = getOS();
     const deviceName = os.hostname();
 
@@ -36,8 +41,6 @@ export async function getDeviceInfo() {
       name: deviceName,
       ipaddress: ipAddress,
       type: deviceType,
-      status: "online",
-      isReceiving: false,
     };
   } catch (error) {
     console.error("Error getting device info:", error);
