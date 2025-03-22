@@ -12,36 +12,20 @@ export function setupWebSocketHandlers(wss) {
           case 'register':
             const deviceId = `${data.device.name}-${data.device.ipaddress}`;
             deviceManager.addConnection(deviceId, ws);
-            // Check status immediately after registration
-            const device = await deviceManager.updateDeviceStatus(data.device.name, data.device.ipaddress);
-            if (device) {
-              deviceManager.broadcastDeviceUpdate(device);
-            }
             break;
 
           case 'updateReceiving':
-            const updatedDevice = deviceManager.updateDeviceReceiving(
+            deviceManager.updateDeviceReceiving(
               data.name, 
               data.ipaddress, 
               data.isReceiving
             );
-            if (updatedDevice) {
-              // Trigger an immediate status check when receiving status changes
-              await deviceManager.updateDeviceStatus(data.name, data.ipaddress);
-            }
-            break;
-
-          case 'updateStatus':
-            const statusDevice = await deviceManager.updateDeviceStatus(data.name, data.ipaddress);
-            if (statusDevice) {
-              deviceManager.broadcastDeviceUpdate(statusDevice);
-            }
             break;
 
           case 'deviceRemoved':
             const removedDevice = deviceManager.removeDevice(data.name, data.ipaddress);
             if (removedDevice) {
-              deviceManager.broadcastDeviceRemoval(removedDevice);
+              deviceManager.broadcastDeviceUpdate(removedDevice);
             }
             break;
         }
