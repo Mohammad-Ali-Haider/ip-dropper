@@ -98,9 +98,22 @@ function DeviceCard({
     handleCloseEdit();
   };
 
-  const handleDelete = () => {
-    onDelete?.({ name, ipaddress, type, status });
-    setShowDeleteModal(false);
+  const handleDelete = async () => {
+    try {
+      const response = await fetch(`http://localhost:3000/api/devices/${encodeURIComponent(name)}/${encodeURIComponent(ipaddress)}`, {
+        method: 'DELETE',
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to delete device: ${response.statusText}`);
+      }
+
+      onDelete?.({ name, ipaddress, type, status });
+      setShowDeleteModal(false);
+    } catch (error) {
+      console.error('Error deleting device:', error);
+      // You might want to add error handling UI here
+    }
   };
 
   const handleCloseEdit = () => {

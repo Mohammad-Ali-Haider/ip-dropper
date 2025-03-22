@@ -15,6 +15,10 @@ export async function getDeviceInfo() {
       });
     });
 
+    if (!ipAddress) {
+      throw new Error('No valid network interface found');
+    }
+
     // Determine OS type
     let deviceType = 'windows';
     const platform = os.platform().toLowerCase();
@@ -32,7 +36,8 @@ export async function getDeviceInfo() {
       name: deviceName,
       ipaddress: ipAddress,
       type: deviceType,
-      status: 'online'
+      status: 'online',
+      isReceiving: false
     };
   } catch (error) {
     console.error('Error getting device info:', error);

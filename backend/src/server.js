@@ -4,6 +4,7 @@ import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import deviceRouter from './routes/deviceRoutes.js';
 import { setupWebSocketHandlers } from './websocket/handlers.js';
+import { deviceManager } from './services/DeviceManager.js';
 
 const app = express();
 const server = createServer(app);
@@ -13,16 +14,17 @@ const wss = new WebSocketServer({ server });
 app.use(cors());
 app.use(express.json());
 
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'healthy' });
-});
-
 // Routes
 app.use('/api/devices', deviceRouter);
 
 // WebSocket setup
 setupWebSocketHandlers(wss);
+
+// Start the server
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
 
 // Error handling
 app.use((err, req, res, next) => {
@@ -30,7 +32,17 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
-const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+// Graceful shutdown
+const shutdown = () => {
+  console.log('Server shutting down...');
+  deviceManager.cleanup();
+  server.close(() => {
+    console.log('Server closed');
+    process.exit(0);
+  });
+};
+
+process.on('SIGINT', shutdown);
+process.on('SIGTERM', shutdown);
+
+export { app, server };

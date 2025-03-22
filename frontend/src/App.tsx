@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import Sidebar from "./components/sidebar/Sidebar";
 import MainLayout from "./layouts/MainLayout";
 import SidebarContent from "./components/sidebar/SidebarContent";
@@ -7,6 +7,8 @@ import { PAGES } from "./constants/navigation";
 import { ThemeProvider } from "./context/ThemeContext";
 import "./styles/App.css";
 import "./styles/markdown.css";
+import { useWebSocket } from './hooks/useWebSocket';
+import { Device } from './types/device';
 
 function App() {
   const [activeTab, setActiveTab] = useState(() => {
@@ -17,7 +19,19 @@ function App() {
     const saved = localStorage.getItem("app.isReceiving");
     return saved ? JSON.parse(saved) : false;
   });
-  // const { devices, setDevices } = useDevices();
+  const [devices, setDevices] = useState<Device[]>([]);
+  const [currentDevice, setCurrentDevice] = useState<Device | null>(null);
+
+  const updateDeviceStatus = useCallback((updatedDevice: Device) => {
+    setDevices(prevDevices => 
+      prevDevices.map(device => 
+        device.ipaddress === updatedDevice.ipaddress ? 
+        updatedDevice : device
+      )
+    );
+  }, []);
+
+  useWebSocket(currentDevice, isReceiving, updateDeviceStatus);
 
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));

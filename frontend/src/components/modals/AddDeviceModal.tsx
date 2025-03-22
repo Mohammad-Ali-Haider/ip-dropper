@@ -21,7 +21,7 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   const [type, setType] = useState<Device["type"]>("windows");
   const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
@@ -49,8 +49,29 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
       status: "offline",
     };
 
-    onAdd(newDevice);
-    handleClose();
+    try {
+      console.log('Attempting to add device:', newDevice);
+      const response = await fetch('http://localhost:3000/api/devices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newDevice),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+      }
+
+      const addedDevice = await response.json();
+      console.log('Device added successfully:', addedDevice);
+      onAdd(newDevice);
+      handleClose();
+    } catch (error) {
+      console.error('Error adding device:', error);
+      setError(error instanceof Error ? error.message : "Failed to add device. Please check if the server is running.");
+    }
   };
 
   const handleClose = () => {

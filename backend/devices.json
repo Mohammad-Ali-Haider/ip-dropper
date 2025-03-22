@@ -1,0 +1,30 @@
+[
+  {
+    "name": "ME",
+    "ipaddress": "192.168.137.104",
+    "type": "mac",
+    "status": "offline",
+    "isReceiving": false
+  },
+  {
+    "name": "MacBookAir.mshome.net",
+    "ipaddress": "192.168.137.104",
+    "type": "mac",
+    "status": "online",
+    "isReceiving": true
+  },
+  {
+    "name": "ALSOME",
+    "ipaddress": "127.0.0.1",
+    "type": "mac",
+    "status": "offline",
+    "isReceiving": false
+  },
+  {
+    "name": "lol",
+    "ipaddress": "1.2.4.4",
+    "type": "windows",
+    "status": "offline",
+    "isReceiving": false
+  }
+]
