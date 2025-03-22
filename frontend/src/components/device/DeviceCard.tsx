@@ -22,11 +22,12 @@ function DeviceCard({
   ipaddress,
   type,
   status,
+  isReceiving,
   isSelected = false,
   onSelect,
   onDelete,
   onEdit,
-  existingDevices,  // Add this to the destructuring
+  existingDevices,
 }: DeviceCardProps) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -35,14 +36,22 @@ function DeviceCard({
   const [editType, setEditType] = useState(type);
   const [error, setError] = useState<string | null>(null);
 
+  const isDeviceActive = status === 'online' && isReceiving === true;
+
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent selection when clicking action buttons
     if ((e.target as HTMLElement).closest('.device-actions')) {
       return;
     }
 
-    if (status === 'online' && onSelect) {
-      onSelect({ name, ipaddress, type, status });
+    if (isDeviceActive && onSelect) {
+      onSelect({
+        name,
+        ipaddress,
+        type,
+        status,
+        isReceiving
+      });
     }
   };
 
@@ -86,12 +95,13 @@ function DeviceCard({
 
     const uniqueName = getUniqueDeviceName(editName.trim(), otherDevices);
 
-    const oldDevice = { name, ipaddress, type, status };
+    const oldDevice = { name, ipaddress, type, status, isReceiving };
     const newDevice = {
       name: uniqueName,
       ipaddress: editIp,
       type: editType,
       status,
+      isReceiving
     };
 
     onEdit?.(oldDevice, newDevice);
@@ -108,7 +118,7 @@ function DeviceCard({
         throw new Error(`Failed to delete device: ${response.statusText}`);
       }
 
-      onDelete?.({ name, ipaddress, type, status });
+      onDelete?.({ name, ipaddress, type, status, isReceiving });
       setShowDeleteModal(false);
     } catch (error) {
       console.error('Error deleting device:', error);

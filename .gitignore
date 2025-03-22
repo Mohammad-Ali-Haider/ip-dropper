@@ -30,6 +30,10 @@ coverage/
 .env.*
 !.env.example
 
+# Application data
+devices.json
+**/devices.json
+
 # Logs
 logs/
 **/logs/

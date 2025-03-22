@@ -73,6 +73,11 @@ function SidebarContent({
         <i className="fas fa-network-wired me-2"></i>
         IP Dropper
       </h1>
+      {error && (
+        <div className="alert alert-danger mb-3" role="alert">
+          {error}
+        </div>
+      )}
       <button
         className={`receiving-btn ${isReceiving ? "active" : ""}`}
         onClick={handleReceivingToggle}

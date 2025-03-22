@@ -20,57 +20,42 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   const [ipaddress, setIpaddress] = useState("");
   const [type, setType] = useState<Device["type"]>("windows");
   const [error, setError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!name.trim()) {
-      setError("Device name is required");
-      return;
-    }
-
-    if (!validateIPAddress(ipaddress)) {
-      setError("Invalid IP address format");
-      return;
-    }
-
-    if (existingDevices.some((device) => device.ipaddress === ipaddress)) {
-      setError("IP address already exists");
-      return;
-    }
-
-    const uniqueName = getUniqueDeviceName(name.trim(), existingDevices);
-
-    const newDevice: Device = {
-      name: uniqueName,
-      ipaddress,
-      type,
-      status: "offline",
-    };
+    setIsSubmitting(true);
 
     try {
-      console.log('Attempting to add device:', newDevice);
-      const response = await fetch('http://localhost:3000/api/devices', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newDevice),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
+      if (!name.trim()) {
+        throw new Error("Device name is required");
       }
 
-      const addedDevice = await response.json();
-      console.log('Device added successfully:', addedDevice);
-      onAdd(newDevice);
+      if (!validateIPAddress(ipaddress)) {
+        throw new Error("Invalid IP address format");
+      }
+
+      if (existingDevices.some((device) => device.ipaddress === ipaddress)) {
+        throw new Error("IP address already exists");
+      }
+
+      const uniqueName = getUniqueDeviceName(name.trim(), existingDevices);
+
+      const newDevice: Device = {
+        name: uniqueName,
+        ipaddress,
+        type,
+        status: "offline",  // Set to offline by default
+        isReceiving: false
+      };
+
+      await onAdd(newDevice);
       handleClose();
     } catch (error) {
-      console.error('Error adding device:', error);
-      setError(error instanceof Error ? error.message : "Failed to add device. Please check if the server is running.");
+      setError(error instanceof Error ? error.message : "Failed to add device");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -79,6 +64,7 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
     setIpaddress("");
     setType("windows");
     setError(null);
+    setIsSubmitting(false);
     onHide();
   };
 
@@ -99,11 +85,16 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
             type="button"
             className="btn btn-secondary"
             onClick={handleClose}
+            disabled={isSubmitting}
           >
             Cancel
           </button>
-          <button type="submit" className="btn btn-primary">
-            Add Device
+          <button 
+            type="submit" 
+            className="btn btn-primary"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Adding...' : 'Add Device'}
           </button>
         </div>
       </form>

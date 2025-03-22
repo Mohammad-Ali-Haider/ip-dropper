@@ -1,0 +1,9 @@
+[
+  {
+    "name": "example-device",
+    "ipaddress": "192.168.1.1",
+    "type": "unknown",
+    "status": "offline",
+    "isReceiving": false
+  }
+]

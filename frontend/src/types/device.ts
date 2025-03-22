@@ -6,6 +6,7 @@ export interface Device {
   ipaddress: string;
   type: DeviceType;
   status: DeviceStatus;
+  isReceiving: boolean;
 }
 
 export interface DeviceFormData {

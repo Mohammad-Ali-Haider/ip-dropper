@@ -9,35 +9,72 @@ import { Device } from "../types/device";
 import "../styles/Devices.css";
 
 function Devices() {
-  const { devices, setDevices } = useDevices();
+  const { devices, isLoading, error, refreshDevices } = useDevices();
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
   const { selectedFiles, handleFileChange, handleRemoveFile, clearFiles } =
     useFileSelection();
 
-  const handleAddDevice = (newDevice: Device) => {
-    setDevices([...devices, newDevice]);
+  const handleAddDevice = async (newDevice: Device) => {
+    try {
+      const response = await fetch('http://localhost:3000/api/devices', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newDevice),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await refreshDevices();
+    } catch (error) {
+      console.error('Error adding device:', error);
+    }
   };
 
-  const handleDeleteDevice = (deviceToDelete: Device) => {
-    setDevices(
-      devices.filter(
-        (device) =>
-          device.name !== deviceToDelete.name ||
-          device.ipaddress !== deviceToDelete.ipaddress
-      )
-    );
+  const handleEditDevice = async (oldDevice: Device, newDevice: Device) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/devices/${encodeURIComponent(oldDevice.name)}/${encodeURIComponent(oldDevice.ipaddress)}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(newDevice),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await refreshDevices();
+    } catch (error) {
+      console.error('Error editing device:', error);
+    }
   };
 
-  const handleEditDevice = (oldDevice: Device, newDevice: Device) => {
-    setDevices(
-      devices.map((device) =>
-        device.name === oldDevice.name &&
-        device.ipaddress === oldDevice.ipaddress
-          ? newDevice
-          : device
-      )
-    );
+  const handleDeleteDevice = async (deviceToDelete: Device) => {
+    try {
+      const response = await fetch(
+        `http://localhost:3000/api/devices/${encodeURIComponent(deviceToDelete.name)}/${encodeURIComponent(deviceToDelete.ipaddress)}`,
+        {
+          method: 'DELETE',
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      await refreshDevices();
+    } catch (error) {
+      console.error('Error deleting device:', error);
+    }
   };
 
   const handleDeviceSelection = (devices: Device[]) => {
@@ -49,6 +86,14 @@ function Devices() {
     console.log("To devices:", selectedDevices);
     clearFiles();
   };
+
+  if (isLoading) {
+    return <div className="devices-container">Loading devices...</div>;
+  }
+
+  if (error) {
+    return <div className="devices-container">Error: {error}</div>;
+  }
 
   return (
     <div className="devices-container">
@@ -83,9 +128,7 @@ function Devices() {
           />
           <button
             className="send-button"
-            disabled={
-              selectedDevices.length === 0 || selectedFiles.length === 0
-            }
+            disabled={selectedDevices.length === 0 || selectedFiles.length === 0}
             onClick={handleSendFiles}
           >
             Send Files
