@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Device } from "../types/device";
+import { API_BASE_URL } from "../constants/api";
 
 export function useDevices() {
   const [devices, setDevices] = useState<Device[]>([]);
@@ -9,7 +10,7 @@ export function useDevices() {
   const fetchDevices = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('http://localhost:3000/api/devices');
+      const response = await fetch(`${API_BASE_URL}/api/devices`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
