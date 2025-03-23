@@ -1,55 +1,73 @@
 import { WebSocketServer } from 'ws';
 import path from 'path';
 import fs from 'fs';
+import { deviceManager } from '../services/deviceWebSocketManager.js';
 
 export function setupWebSocketServer(server) {
   const wss = new WebSocketServer({ server, path: '/ws' });
 
-  wss.on('connection', (ws) => {
-    console.log('New WebSocket connection');
+  wss.on('connection', (ws, req) => {
+    const clientIp = req.socket.remoteAddress;
+    console.log(`New WebSocket connection from ${clientIp}`);
 
     ws.on('message', async (message) => {
       try {
         const data = JSON.parse(message);
+        console.log('Received message type:', data.type);
+        
+        if (data.type === 'device-register') {
+          console.log(`Registering device with IP: ${data.ip}`);
+          deviceManager.addDevice(data.ip, ws);
+          ws.send(JSON.stringify({ type: 'registered', status: 'success' }));
+          console.log(`Device ${data.ip} registered successfully`);
+          return;
+        }
         
         if (data.type === 'file') {
-          console.log(`Received file ${data.name} for ${data.targetIp}`);
+          console.log(`Processing file transfer:
+            Name: ${data.name}
+            Size: ${data.size} bytes
+            Target IP: ${data.targetIp}
+          `);
           
-          // Implement actual file transfer logic
-          const { content, name, targetIp } = data;
-          
-          // Convert ArrayBuffer to Buffer - content is already an ArrayBuffer from FileReader
-          const fileBuffer = Buffer.from(new Uint8Array(content));
-          
-          // Create directory for target device if it doesn't exist
-          const targetDir = path.join(process.cwd(), 'uploads', targetIp);
-          await fs.promises.mkdir(targetDir, { recursive: true });
-          
-          // Save file with timestamp to prevent overwrites
-          const timestamp = new Date().getTime();
-          const fileName = `${timestamp}-${name}`;
-          const filePath = path.join(targetDir, fileName);
-          
-          try {
+          if (!deviceManager.isDeviceConnected(data.targetIp)) {
+            console.log(`Target device ${data.targetIp} is offline, storing file`);
+            const targetDir = path.join(process.cwd(), 'uploads', data.targetIp);
+            await fs.promises.mkdir(targetDir, { recursive: true });
+            
+            const timestamp = new Date().getTime();
+            const fileName = `${timestamp}-${data.name}`;
+            const filePath = path.join(targetDir, fileName);
+            
+            // Fix: Convert ArrayBuffer to Buffer correctly
+            const fileBuffer = Buffer.from(new Uint8Array(data.content));
             await fs.promises.writeFile(filePath, fileBuffer);
-            console.log(`File saved successfully: ${filePath}`);
-          } catch (error) {
-            console.error('Error saving file:', error);
+            
+            console.log(`File stored at: ${filePath}`);
             ws.send(JSON.stringify({
-              type: 'error',
-              message: 'Failed to save file'
+              type: 'response',
+              status: 'stored',
+              message: 'Device offline, file stored for later delivery',
+              fileName: data.name,
+              targetIp: data.targetIp
             }));
-            return;
+          } else {
+            console.log(`Target device ${data.targetIp} is online, forwarding file`);
+            await deviceManager.sendToDevice(data.targetIp, {
+              type: 'incoming-file',
+              name: data.name,
+              size: data.size,
+              content: data.content
+            });
+            
+            console.log('File forwarded successfully');
+            ws.send(JSON.stringify({
+              type: 'response',
+              status: 'delivered',
+              fileName: data.name,
+              targetIp: data.targetIp
+            }));
           }
-          
-          // Send acknowledgment back to client
-          ws.send(JSON.stringify({
-            type: 'response',
-            status: 'success',
-            fileName: data.name,
-            targetIp: data.targetIp,
-            timestamp: new Date().toISOString()
-          }));
         }
       } catch (error) {
         console.error('Error processing WebSocket message:', error);
@@ -58,6 +76,10 @@ export function setupWebSocketServer(server) {
           message: error.message
         }));
       }
+    });
+
+    ws.on('close', () => {
+      console.log(`Client ${clientIp} disconnected`);
     });
   });
 

@@ -1,6 +1,7 @@
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private static instance: WebSocketService;
+  private messageHandlers: ((data: any) => void)[] = [];
 
   private constructor() {}
 
@@ -28,6 +29,31 @@ export class WebSocketService {
       this.ws.onclose = () => {
         console.log('WebSocket Disconnected');
       };
+
+      this.ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        this.messageHandlers.forEach(handler => handler(data));
+      };
+    });
+  }
+
+  onMessage(handler: (data: any) => void) {
+    this.messageHandlers.push(handler);
+  }
+
+  send(data: any): Promise<void> {
+    return new Promise((resolve, reject) => {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        reject(new Error('WebSocket is not connected'));
+        return;
+      }
+
+      try {
+        this.ws.send(JSON.stringify(data));
+        resolve();
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
@@ -41,22 +67,36 @@ export class WebSocketService {
       const reader = new FileReader();
       reader.onload = async () => {
         try {
+          console.log(`Preparing to send file: ${file.name} to ${deviceIp}`);
+          
+          // Convert ArrayBuffer to array for proper JSON serialization
+          const arrayBuffer = reader.result as ArrayBuffer;
+          const uint8Array = new Uint8Array(arrayBuffer);
+          const array = Array.from(uint8Array);
+
           const fileData = {
             type: 'file',
             name: file.name,
             size: file.size,
             targetIp: deviceIp,
-            content: reader.result,
+            content: array
           };
 
-          this.ws?.send(JSON.stringify(fileData));
+          console.log('Sending file data...', { name: fileData.name, size: fileData.size });
+          await this.send(fileData);
+          console.log('File sent successfully');
           resolve();
         } catch (error) {
+          console.error('Error sending file:', error);
           reject(error);
         }
       };
 
-      reader.onerror = (error) => reject(error);
+      reader.onerror = (error) => {
+        console.error('Error reading file:', error);
+        reject(error);
+      };
+      
       reader.readAsArrayBuffer(file);
     });
   }
