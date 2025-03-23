@@ -1,7 +1,6 @@
 import express from "express";
 import {
   getCurrentDevice,
-  getAllDevices,
   getDeviceStatus,
   getDeviceType,
   sendFile,
@@ -10,10 +9,8 @@ import {
 const router = express.Router();
 
 router.get("/current", getCurrentDevice);
-router.get("/", getAllDevices);
-router.get('/:ip/status', getDeviceStatus);
-router.get('/:ip/type', getDeviceType);
-router.post('/:ip/send', sendFile);
-// router.put('/current/receiving', updateCurrentDeviceReceiving);
+router.get("/:ip/status", getDeviceStatus);
+router.get("/:ip/type", getDeviceType);
+router.post("/:ip/send", sendFile);
 
 export default router;
