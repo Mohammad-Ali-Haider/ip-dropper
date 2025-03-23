@@ -1,7 +1,4 @@
-/**
- * Imports the utility function for retrieving device information
- */
-import { getDeviceInfo } from "../utils/deviceUtils.js";
+import os from 'os';
 
 /**
  * Controller function to handle GET requests for current device information
@@ -9,18 +6,46 @@ import { getDeviceInfo } from "../utils/deviceUtils.js";
  * @param {Response} res - Express response object
  * @returns {Promise<void>} - Resolves when response is sent
  */
-export async function getCurrentDevice(req, res) {
+export function getCurrentDevice(req, res) {
   try {
-    // Get current device information using utility function
-    const deviceInfo = await getDeviceInfo();
-    // Send device info as JSON response
+    const interfaces = os.networkInterfaces();
+    const networkInterfaces = [];
+
+    // Process all network interfaces
+    Object.entries(interfaces).forEach(([name, addresses]) => {
+      const interfaceInfo = {
+        name,
+        isInternal: false
+      };
+
+      addresses.forEach(addr => {
+        if (addr.family === 'IPv4') {
+          interfaceInfo.ipv4 = addr.address;
+          interfaceInfo.isInternal = addr.internal;
+        } else if (addr.family === 'IPv6') {
+          interfaceInfo.ipv6 = addr.address;
+          interfaceInfo.isInternal = addr.internal;
+        }
+      });
+
+      networkInterfaces.push(interfaceInfo);
+    });
+
+    const deviceInfo = {
+      name: os.hostname(),
+      type: process.platform === 'win32' ? 'windows' : 
+            process.platform === 'darwin' ? 'mac' : 
+            process.platform === 'linux' ? 'linux' : 'unknown',
+      interfaces: networkInterfaces
+    };
+
+    console.log('Current device network interfaces:', networkInterfaces);
     res.json(deviceInfo);
   } catch (error) {
-    // Log and handle any errors that occur
-    console.error("Error getting current device info:", error);
-    res.status(500).json({
-      error: "Failed to get current device info",
-      details: error.message,
+    console.error('Error getting current device info:', error);
+    res.status(500).json({ 
+      error: "Failed to get device info",
+      details: error.message 
     });
   }
 }
