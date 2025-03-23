@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Device } from "../../types/device";
-import { API_BASE_URL } from "../../constants/api";
 import { getDeviceStatus, getDeviceType } from "../../services/deviceService";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
@@ -134,27 +133,9 @@ function DeviceCard({
     handleCloseEdit();
   };
 
-  const handleDelete = async () => {
-    try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/devices/${encodeURIComponent(
-          name
-        )}/${encodeURIComponent(ipaddress)}`,
-        {
-          method: "DELETE",
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Failed to delete device: ${response.statusText}`);
-      }
-
-      onDelete?.({ name, ipaddress });
-      setShowDeleteModal(false);
-    } catch (error) {
-      console.error("Error deleting device:", error);
-      // You might want to add error handling UI here
-    }
+  const handleDelete = () => {
+    onDelete?.({ name, ipaddress });
+    setShowDeleteModal(false);
   };
 
   const handleCloseEdit = () => {

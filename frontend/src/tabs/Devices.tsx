@@ -1,30 +1,33 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import DeviceList from "../components/device/DeviceList";
 import Button from "../components/common/Button";
 import AddDeviceModal from "../components/modals/AddDeviceModal";
 import { UploadArea } from "../components/fileupload/UploadArea";
 import { useFileSelection } from "../hooks/useFileSelection";
-import { useDevices } from "../hooks/useDevices";
 import { Device } from "../types/device";
 import {
-  addDevice,
-  editDevice,
-  deleteDevice,
   sendFiles,
 } from "../services/deviceService";
 import "../styles/Devices.css";
 
 function Devices() {
-  const { devices, isLoading, error, refreshDevices } = useDevices();
+  const [devices, setDevices] = useState<Device[]>(() => {
+    const savedDevices = localStorage.getItem('devices');
+    return savedDevices ? JSON.parse(savedDevices) : [];
+  });
+
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
   const { selectedFiles, handleFileChange, handleRemoveFile, clearFiles } =
     useFileSelection();
 
+  useEffect(() => {
+    localStorage.setItem('devices', JSON.stringify(devices));
+  }, [devices]);
+
   const handleAddDevice = async (newDevice: Device) => {
     try {
-      await addDevice(newDevice);
-      await refreshDevices();
+      setDevices(prevDevices => [...prevDevices, newDevice]);
     } catch (error) {
       console.error("Error adding device:", error);
     }
@@ -32,8 +35,11 @@ function Devices() {
 
   const handleEditDevice = async (oldDevice: Device, newDevice: Device) => {
     try {
-      await editDevice(oldDevice, newDevice);
-      await refreshDevices();
+      setDevices(prevDevices => 
+        prevDevices.map(device => 
+          device.ipaddress === oldDevice.ipaddress ? newDevice : device
+        )
+      );
     } catch (error) {
       console.error("Error editing device:", error);
     }
@@ -41,8 +47,9 @@ function Devices() {
 
   const handleDeleteDevice = async (deviceToDelete: Device) => {
     try {
-      await deleteDevice(deviceToDelete);
-      await refreshDevices();
+      setDevices(prevDevices => 
+        prevDevices.filter(device => device.ipaddress !== deviceToDelete.ipaddress)
+      );
     } catch (error) {
       console.error("Error deleting device:", error);
     }
@@ -56,14 +63,6 @@ function Devices() {
     sendFiles(selectedFiles, selectedDevices);
     clearFiles();
   };
-
-  if (isLoading) {
-    return <div className="devices-container">Loading devices...</div>;
-  }
-
-  if (error) {
-    return <div className="devices-container">Error: {error}</div>;
-  }
 
   return (
     <div className="devices-container">
