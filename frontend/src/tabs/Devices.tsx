@@ -5,14 +5,12 @@ import AddDeviceModal from "../components/modals/AddDeviceModal";
 import { UploadArea } from "../components/fileupload/UploadArea";
 import { useFileSelection } from "../hooks/useFileSelection";
 import { Device } from "../types/device";
-import {
-  sendFiles,
-} from "../services/deviceService";
+import { sendFiles } from "../services/deviceService";
 import "../styles/Devices.css";
 
 function Devices() {
   const [devices, setDevices] = useState<Device[]>(() => {
-    const savedDevices = localStorage.getItem('devices');
+    const savedDevices = localStorage.getItem("devices");
     return savedDevices ? JSON.parse(savedDevices) : [];
   });
 
@@ -22,12 +20,12 @@ function Devices() {
     useFileSelection();
 
   useEffect(() => {
-    localStorage.setItem('devices', JSON.stringify(devices));
+    localStorage.setItem("devices", JSON.stringify(devices));
   }, [devices]);
 
   const handleAddDevice = async (newDevice: Device) => {
     try {
-      setDevices(prevDevices => [...prevDevices, newDevice]);
+      setDevices((prevDevices) => [...prevDevices, newDevice]);
     } catch (error) {
       console.error("Error adding device:", error);
     }
@@ -35,8 +33,8 @@ function Devices() {
 
   const handleEditDevice = async (oldDevice: Device, newDevice: Device) => {
     try {
-      setDevices(prevDevices => 
-        prevDevices.map(device => 
+      setDevices((prevDevices) =>
+        prevDevices.map((device) =>
           device.ipaddress === oldDevice.ipaddress ? newDevice : device
         )
       );
@@ -47,8 +45,10 @@ function Devices() {
 
   const handleDeleteDevice = async (deviceToDelete: Device) => {
     try {
-      setDevices(prevDevices => 
-        prevDevices.filter(device => device.ipaddress !== deviceToDelete.ipaddress)
+      setDevices((prevDevices) =>
+        prevDevices.filter(
+          (device) => device.ipaddress !== deviceToDelete.ipaddress
+        )
       );
     } catch (error) {
       console.error("Error deleting device:", error);
