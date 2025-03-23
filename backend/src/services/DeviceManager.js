@@ -6,8 +6,8 @@ class DeviceManager {
   constructor() {
     console.log("DeviceManager instance created");
     this.devices = new Map();
+    this.connections = new Map(); // WebSocket connections
     this.storageFile = path.join(process.cwd(), "devices.json");
-    this.peers = new Map(); // Track peer connections
     this.loadDevices();
   }
 
@@ -120,6 +120,23 @@ class DeviceManager {
       return device;
     }
     return null;
+  }
+
+  // Add a WebSocket connection for a device
+  addConnection(deviceId, ws) {
+    this.connections.set(deviceId, ws);
+    console.log(`WebSocket connection added for device: ${deviceId}`);
+  }
+
+  // Get a WebSocket connection for a device
+  getConnection(deviceId) {
+    return this.connections.get(deviceId);
+  }
+
+  // Remove a WebSocket connection
+  removeConnection(deviceId) {
+    this.connections.delete(deviceId);
+    console.log(`WebSocket connection removed for device: ${deviceId}`);
   }
 }
 

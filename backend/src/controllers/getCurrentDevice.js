@@ -39,7 +39,7 @@ export function getCurrentDevice(req, res) {
       interfaces: networkInterfaces
     };
 
-    console.log('Current device network interfaces:', networkInterfaces);
+    // console.log('Current device network interfaces:', networkInterfaces);
     res.json(deviceInfo);
   } catch (error) {
     console.error('Error getting current device info:', error);

@@ -46,9 +46,45 @@ export const deleteDevice = async (deviceToDelete: Device): Promise<void> => {
   }
 };
 
-export const sendFiles = (selectedFiles: File[], selectedDevices: Device[]): void => {
+export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]): Promise<void> => {
   console.log("Sending files:", selectedFiles);
   console.log("To devices:", selectedDevices);
+
+  const sendPromises = selectedDevices.flatMap(device => 
+    selectedFiles.map(async file => {
+      try {
+        // For Electron, we can use the File object directly
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const response = await fetch(
+          `${API_BASE_URL}/api/devices/${encodeURIComponent(device.ipaddress)}/send`,
+          {
+            method: 'POST',
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+          throw new Error(`Failed to send ${file.name} to ${device.ipaddress}: ${errorData.error || 'Unknown error'}`);
+        }
+
+        console.log(`Successfully initiated send of ${file.name} to ${device.ipaddress}`);
+      } catch (error) {
+        console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
+        throw error;
+      }
+    })
+  );
+
+  try {
+    await Promise.all(sendPromises);
+    console.log('All file transfers initiated successfully');
+  } catch (error) {
+    console.error('Some file transfers failed:', error);
+    throw new Error('Failed to send some files');
+  }
 };
 
 export const getDeviceStatus = async (ipaddress: string): Promise<DeviceStatus> => {

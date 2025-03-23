@@ -7,6 +7,8 @@ import {
   updateDevice,
   getDeviceStatus,
   getDeviceType,
+  sendFile,
+  // updateCurrentDeviceReceiving,
 } from "../controllers/index.js";
 import { validateDeviceFields } from "../middleware/deviceValidation.js";
 
@@ -19,5 +21,7 @@ router.delete("/:name/:ip", deleteDevice);
 router.put("/:name/:ip", validateDeviceFields, updateDevice);
 router.get('/:ip/status', getDeviceStatus);
 router.get('/:ip/type', getDeviceType);
+router.post('/:ip/send', sendFile);
+// router.put('/current/receiving', updateCurrentDeviceReceiving);
 
 export default router;
