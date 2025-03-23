@@ -6,8 +6,8 @@ interface Props {
   setName: (name: string) => void;
   ipaddress: string;
   setIpaddress: (ip: string) => void;
-  type: Device['type'];
-  setType: (type: Device['type']) => void;
+  // type: Device['type'];
+  // setType: (type: Device['type']) => void;
   error?: string | null;
 }
 
@@ -16,8 +16,8 @@ function DeviceForm({
   setName,
   ipaddress,
   setIpaddress,
-  type,
-  setType,
+  // type,
+  // setType,
   error
 }: Props) {
   return (
@@ -43,7 +43,7 @@ function DeviceForm({
         />
       </Form.Group>
 
-      <Form.Group className="mb-3">
+      {/* <Form.Group className="mb-3">
         <Form.Label>Type</Form.Label>
         <Form.Select
           value={type}
@@ -53,7 +53,7 @@ function DeviceForm({
           <option value="mac">Mac</option>
           <option value="linux">Linux</option>
         </Form.Select>
-      </Form.Group>
+      </Form.Group> */}
     </>
   );
 }

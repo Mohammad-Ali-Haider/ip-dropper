@@ -1,4 +1,4 @@
-import { Device, DeviceStatus } from "../types/device";
+import { Device, DeviceStatus, DeviceType } from "../types/device";
 import { API_BASE_URL } from "../constants/api";
 
 export const addDevice = async (newDevice: Device): Promise<void> => {
@@ -11,7 +11,8 @@ export const addDevice = async (newDevice: Device): Promise<void> => {
   });
 
   if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
+    const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+    throw new Error(`HTTP error! status: ${response.status}, message: ${errorData.error || 'Unknown error'}`);
   }
 };
 
@@ -50,9 +51,9 @@ export const sendFiles = (selectedFiles: File[], selectedDevices: Device[]): voi
   console.log("To devices:", selectedDevices);
 };
 
-export const getDeviceStatus = async (device: Device): Promise<DeviceStatus> => {
+export const getDeviceStatus = async (ipaddress: string): Promise<DeviceStatus> => {
   const response = await fetch(
-    `${API_BASE_URL}/api/devices/${encodeURIComponent(device.ipaddress)}/status`,
+    `${API_BASE_URL}/api/devices/${encodeURIComponent(ipaddress)}/status`,
     {
       method: 'GET',
       headers: {
@@ -67,3 +68,24 @@ export const getDeviceStatus = async (device: Device): Promise<DeviceStatus> => 
 
   return response.json();
 };
+
+export const getDeviceType = async (ipaddress: string): Promise<DeviceType> => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/devices/${encodeURIComponent(ipaddress)}/type`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.type;
+};
+
+

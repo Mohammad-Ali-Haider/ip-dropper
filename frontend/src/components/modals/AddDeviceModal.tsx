@@ -18,7 +18,7 @@ interface Props {
 function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   const [name, setName] = useState("");
   const [ipaddress, setIpaddress] = useState("");
-  const [type, setType] = useState<Device["type"]>("windows");
+  // const [type, setType] = useState<Device["type"]>("windows");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -42,12 +42,15 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
 
       const uniqueName = getUniqueDeviceName(name.trim(), existingDevices);
 
+      // Add console.log to see what we're sending
+      console.log("Sending device data:", {
+        name: uniqueName,
+        ipaddress,
+      });
+
       const newDevice: Device = {
         name: uniqueName,
         ipaddress,
-        type,
-        // status: "offline",
-        // isReceiving: false
       };
 
       await onAdd(newDevice);
@@ -62,7 +65,7 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
   const handleClose = () => {
     setName("");
     setIpaddress("");
-    setType("windows");
+    // setType("windows");
     setError(null);
     setIsSubmitting(false);
     onHide();
@@ -76,8 +79,8 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
           setName={setName}
           ipaddress={ipaddress}
           setIpaddress={setIpaddress}
-          type={type}
-          setType={setType}
+          // type={type}
+          // setType={setType}
           error={error}
         />
         <div className="d-flex justify-content-end gap-2 mt-3">
@@ -89,12 +92,12 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
           >
             Cancel
           </button>
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             className="btn btn-primary"
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Adding...' : 'Add Device'}
+            {isSubmitting ? "Adding..." : "Add Device"}
           </button>
         </div>
       </form>

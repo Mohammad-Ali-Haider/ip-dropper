@@ -19,5 +19,8 @@
     "cross-env": "^7.0.3",
     "electron": "^28.0.0",
     "electron-builder": "^24.0.0"
+  },
+  "dependencies": {
+    "ping": "^0.4.4"
   }
 }

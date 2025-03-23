@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Device } from "../../types/device";
 import { API_BASE_URL } from "../../constants/api";
-import { getDeviceStatus } from "../../services/deviceService";
+import { getDeviceStatus, getDeviceType } from "../../services/deviceService";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -22,7 +22,6 @@ interface DeviceCardProps extends Device {
 function DeviceCard({
   name,
   ipaddress,
-  type,
   isSelected = false,
   onSelect,
   onDelete,
@@ -33,50 +32,42 @@ function DeviceCard({
   const [showEditModal, setShowEditModal] = useState(false);
   const [editName, setEditName] = useState(name);
   const [editIp, setEditIp] = useState(ipaddress);
-  const [editType, setEditType] = useState(type);
   const [error, setError] = useState<string | null>(null);
   const [deviceStatus, setDeviceStatus] = useState({ isOnline: false });
-  const [deviceIconType, setDeviceIconType] = useState<Device["type"]>(type);
-
-  useEffect(() => {
-    const fetchDeviceType = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/devices/${ipaddress}/type`);
-        const data = await response.json();
-        setDeviceIconType(data.type);
-      } catch (error) {
-        console.error("Error fetching device type:", error);
-        setDeviceIconType(type); // Fallback to prop type
-      }
-    };
-
-    fetchDeviceType();
-  }, [ipaddress, type]);
+  const [deviceType, setDeviceType] = useState("");
 
   useEffect(() => {
     let mounted = true;
-    const checkStatus = async () => {
+    
+    const checkStatusAndType = async () => {
       try {
-        const status = await getDeviceStatus({ name, ipaddress, type });
+        // Fetch both status and type
+        const [status, type] = await Promise.all([
+          getDeviceStatus(ipaddress),
+          getDeviceType(ipaddress)
+        ]);
+
         if (mounted) {
           setDeviceStatus(status);
+          setDeviceType(type);
         }
       } catch (error) {
-        console.error("Error checking device status:", error);
+        console.error("Error checking device status or type:", error);
         if (mounted) {
           setDeviceStatus({ isOnline: false });
+          setDeviceType("");
         }
       }
     };
 
-    const intervalId = setInterval(checkStatus, 5000); // Check every 5 seconds
-    checkStatus(); // Initial check
+    const intervalId = setInterval(checkStatusAndType, 5000);
+    checkStatusAndType(); // Initial check
 
     return () => {
       mounted = false;
       clearInterval(intervalId);
     };
-  }, [name, ipaddress, type]);
+  }, [ipaddress]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent selection when clicking action buttons
@@ -88,7 +79,7 @@ function DeviceCard({
       onSelect({
         name,
         ipaddress,
-        type,
+        // type,
       });
     }
   };
@@ -102,7 +93,7 @@ function DeviceCard({
       case "linux":
         return "fa-linux";
       default:
-        return "fa-computer";
+        return "fa-desktop";
     }
   };
 
@@ -133,11 +124,10 @@ function DeviceCard({
 
     const uniqueName = getUniqueDeviceName(editName.trim(), otherDevices);
 
-    const oldDevice = { name, ipaddress, type };
+    const oldDevice = { name, ipaddress };
     const newDevice = {
       name: uniqueName,
       ipaddress: editIp,
-      type: editType,
     };
 
     onEdit?.(oldDevice, newDevice);
@@ -159,7 +149,7 @@ function DeviceCard({
         throw new Error(`Failed to delete device: ${response.statusText}`);
       }
 
-      onDelete?.({ name, ipaddress, type });
+      onDelete?.({ name, ipaddress });
       setShowDeleteModal(false);
     } catch (error) {
       console.error("Error deleting device:", error);
@@ -170,7 +160,6 @@ function DeviceCard({
   const handleCloseEdit = () => {
     setEditName(name);
     setEditIp(ipaddress);
-    setEditType(type);
     setError(null);
     setShowEditModal(false);
   };
@@ -185,7 +174,15 @@ function DeviceCard({
         title={!deviceStatus.isOnline ? "Cannot select offline devices" : ""}
       >
         <div className="device-icon">
-          <i className={`fab ${getDeviceIcon(deviceIconType)}`}></i>
+          <i
+            className={`${
+              deviceType === "windows" ||
+              deviceType === "mac" ||
+              deviceType === "linux"
+                ? "fab"
+                : "fas"
+            } ${getDeviceIcon(deviceType)}`}
+          ></i>
           <span className="status-indicator"></span>
         </div>
         <div className="device-info">
@@ -229,8 +226,6 @@ function DeviceCard({
             setName={setEditName}
             ipaddress={editIp}
             setIpaddress={setEditIp}
-            type={editType}
-            setType={setEditType}
             error={error}
           />
           <div className="d-flex justify-content-end gap-2 mt-3">
