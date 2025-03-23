@@ -94,6 +94,33 @@ class DeviceManager {
       this.peers.set(deviceId, connection);
     }
   }
+
+  updateDeviceReceiving(name, ipaddress, isReceiving) {
+    const deviceId = `${name}-${ipaddress}`;
+    const device = this.devices.get(deviceId);
+    
+    if (device) {
+      device.isReceiving = isReceiving;
+      device.lastSeen = new Date().toISOString();
+      this.devices.set(deviceId, device);
+      this.saveDevices();
+      return device;
+    }
+    return null;
+  }
+
+  // Add a method to update lastSeen timestamp
+  updateLastSeen(name, ipaddress) {
+    const deviceId = `${name}-${ipaddress}`;
+    const device = this.devices.get(deviceId);
+    
+    if (device) {
+      device.lastSeen = new Date().toISOString();
+      this.devices.set(deviceId, device);
+      return device;
+    }
+    return null;
+  }
 }
 
 export const deviceManager = new DeviceManager();

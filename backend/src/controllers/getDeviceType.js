@@ -5,9 +5,8 @@ export function getDeviceType(req, res) {
     // console.log('Available devices:', deviceManager.getDevices());
 
     res.json({
-      type: ["windows", "mac", "linux"][Math.floor(Math.random() * 3)],
-      // isOnline: device.status === 'online',
-      // isReceiving: device.isReceiving || false
+      type: "",
+      // type: ["windows", "mac", "linux"][Math.floor(Math.random() * 3)],
     });
   } catch (error) {
     console.error("Error getting device status:", error);
