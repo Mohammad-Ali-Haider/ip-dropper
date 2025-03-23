@@ -52,7 +52,7 @@ export const sendFiles = (selectedFiles: File[], selectedDevices: Device[]): voi
 
 export const getDeviceStatus = async (device: Device): Promise<DeviceStatus> => {
   const response = await fetch(
-    `${API_BASE_URL}/api/devices/${encodeURIComponent(device.name)}/${encodeURIComponent(device.ipaddress)}/status`,
+    `${API_BASE_URL}/api/devices/${encodeURIComponent(device.ipaddress)}/status`,
     {
       method: 'GET',
       headers: {

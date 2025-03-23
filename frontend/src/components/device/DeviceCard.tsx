@@ -36,6 +36,22 @@ function DeviceCard({
   const [editType, setEditType] = useState(type);
   const [error, setError] = useState<string | null>(null);
   const [deviceStatus, setDeviceStatus] = useState({ isOnline: false });
+  const [deviceIconType, setDeviceIconType] = useState<Device["type"]>(type);
+
+  useEffect(() => {
+    const fetchDeviceType = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/devices/${ipaddress}/type`);
+        const data = await response.json();
+        setDeviceIconType(data.type);
+      } catch (error) {
+        console.error("Error fetching device type:", error);
+        setDeviceIconType(type); // Fallback to prop type
+      }
+    };
+
+    fetchDeviceType();
+  }, [ipaddress, type]);
 
   useEffect(() => {
     let mounted = true;
@@ -77,7 +93,7 @@ function DeviceCard({
     }
   };
 
-  const getDeviceIcon = (deviceType: Device["type"]) => {
+  const getDeviceIcon = (deviceType: string) => {
     switch (deviceType) {
       case "windows":
         return "fa-windows";
@@ -169,7 +185,7 @@ function DeviceCard({
         title={!deviceStatus.isOnline ? "Cannot select offline devices" : ""}
       >
         <div className="device-icon">
-          <i className={`fab ${getDeviceIcon(type)}`}></i>
+          <i className={`fab ${getDeviceIcon(deviceIconType)}`}></i>
           <span className="status-indicator"></span>
         </div>
         <div className="device-info">
