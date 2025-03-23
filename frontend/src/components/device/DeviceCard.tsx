@@ -1,5 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Device } from "../../types/device";
+import { API_BASE_URL } from "../../constants/api";
+import { getDeviceStatus } from "../../services/deviceService";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -10,19 +12,17 @@ import {
 import "../../styles/DeviceCard.css";
 
 interface DeviceCardProps extends Device {
-  isSelected?: boolean;
   onSelect?: (device: Device) => void;
   onDelete?: (device: Device) => void;
   onEdit?: (oldDevice: Device, newDevice: Device) => void;
-  existingDevices: Device[];  // Make sure this is required
+  existingDevices: Device[];
+  isSelected?: boolean;
 }
 
 function DeviceCard({
   name,
   ipaddress,
   type,
-  status,
-  isReceiving,
   isSelected = false,
   onSelect,
   onDelete,
@@ -35,22 +35,44 @@ function DeviceCard({
   const [editIp, setEditIp] = useState(ipaddress);
   const [editType, setEditType] = useState(type);
   const [error, setError] = useState<string | null>(null);
+  const [deviceStatus, setDeviceStatus] = useState({ isOnline: false });
 
-  const isDeviceActive = status === 'online' && isReceiving === true;
+  useEffect(() => {
+    let mounted = true;
+    const checkStatus = async () => {
+      try {
+        const status = await getDeviceStatus({ name, ipaddress, type });
+        if (mounted) {
+          setDeviceStatus(status);
+        }
+      } catch (error) {
+        console.error("Error checking device status:", error);
+        if (mounted) {
+          setDeviceStatus({ isOnline: false });
+        }
+      }
+    };
+
+    const intervalId = setInterval(checkStatus, 5000); // Check every 5 seconds
+    checkStatus(); // Initial check
+
+    return () => {
+      mounted = false;
+      clearInterval(intervalId);
+    };
+  }, [name, ipaddress, type]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent selection when clicking action buttons
-    if ((e.target as HTMLElement).closest('.device-actions')) {
+    if ((e.target as HTMLElement).closest(".device-actions")) {
       return;
     }
 
-    if (isDeviceActive && onSelect) {
+    if (deviceStatus.isOnline && onSelect) {
       onSelect({
         name,
         ipaddress,
         type,
-        status,
-        isReceiving
       });
     }
   };
@@ -84,24 +106,22 @@ function DeviceCard({
 
     // Get all other devices (excluding the current one being edited)
     const otherDevices = existingDevices.filter(
-      device => device.ipaddress !== ipaddress || device.name !== name
+      (device) => device.ipaddress !== ipaddress || device.name !== name
     );
 
     // Check if IP address is already in use by another device
-    if (otherDevices.some(device => device.ipaddress === editIp)) {
+    if (otherDevices.some((device) => device.ipaddress === editIp)) {
       setError("IP address already exists");
       return;
     }
 
     const uniqueName = getUniqueDeviceName(editName.trim(), otherDevices);
 
-    const oldDevice = { name, ipaddress, type, status, isReceiving };
+    const oldDevice = { name, ipaddress, type };
     const newDevice = {
       name: uniqueName,
       ipaddress: editIp,
       type: editType,
-      status,
-      isReceiving
     };
 
     onEdit?.(oldDevice, newDevice);
@@ -110,18 +130,23 @@ function DeviceCard({
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`http://localhost:3000/api/devices/${encodeURIComponent(name)}/${encodeURIComponent(ipaddress)}`, {
-        method: 'DELETE',
-      });
+      const response = await fetch(
+        `${API_BASE_URL}/api/devices/${encodeURIComponent(
+          name
+        )}/${encodeURIComponent(ipaddress)}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         throw new Error(`Failed to delete device: ${response.statusText}`);
       }
 
-      onDelete?.({ name, ipaddress, type, status, isReceiving });
+      onDelete?.({ name, ipaddress, type });
       setShowDeleteModal(false);
     } catch (error) {
-      console.error('Error deleting device:', error);
+      console.error("Error deleting device:", error);
       // You might want to add error handling UI here
     }
   };
@@ -136,10 +161,12 @@ function DeviceCard({
 
   return (
     <>
-      <div 
-        className={`device-card ${status} ${isSelected ? 'selected' : ''}`}
+      <div
+        className={`device-card ${
+          deviceStatus.isOnline ? "online" : "offline"
+        } ${isSelected ? "selected" : ""}`}
         onClick={handleCardClick}
-        title={status === 'offline' ? "Cannot select offline devices" : ""}
+        title={!deviceStatus.isOnline ? "Cannot select offline devices" : ""}
       >
         <div className="device-icon">
           <i className={`fab ${getDeviceIcon(type)}`}></i>
@@ -191,7 +218,11 @@ function DeviceCard({
             error={error}
           />
           <div className="d-flex justify-content-end gap-2 mt-3">
-            <button type="button" className="btn btn-secondary" onClick={handleCloseEdit}>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleCloseEdit}
+            >
               Cancel
             </button>
             <button type="submit" className="btn btn-primary">

@@ -46,8 +46,8 @@ function AddDeviceModal({ show, onHide, onAdd, existingDevices }: Props) {
         name: uniqueName,
         ipaddress,
         type,
-        status: "offline",  // Set to offline by default
-        isReceiving: false
+        // status: "offline",
+        // isReceiving: false
       };
 
       await onAdd(newDevice);

@@ -11,36 +11,22 @@ export function useWebSocket(
   useEffect(() => {
     if (!currentDevice) return;
 
-    // Connect to WebSocket
-    ws.current = new WebSocket('ws://localhost:3000');
-
-    ws.current.onopen = () => {
-      console.log('WebSocket connected');
-      // Register device
-      if (ws.current) {
-        ws.current.send(JSON.stringify({
-          type: 'register',
-          device: currentDevice
-        }));
+    // Connect to other devices on the network
+    const connectToDevice = async (targetIp: string) => {
+      try {
+        ws.current = new WebSocket(`ws://${targetIp}:3000`);
+        // ... rest of WebSocket setup
+      } catch (error) {
+        console.error('Failed to connect to device:', error);
       }
     };
 
-    ws.current.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'deviceUpdate') {
-        updateDeviceStatus(data.device);
-      }
+    // Discover other devices on network
+    const discoverDevices = async () => {
+      // Implement network discovery logic
     };
 
-    ws.current.onerror = (error) => {
-      console.error('WebSocket error:', error);
-    };
-
-    return () => {
-      if (ws.current) {
-        ws.current.close();
-      }
-    };
+    discoverDevices();
   }, [currentDevice]);
 
   // Update receiving status

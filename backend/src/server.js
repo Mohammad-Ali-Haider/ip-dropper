@@ -33,16 +33,27 @@ app.use((err, req, res, next) => {
 });
 
 // Graceful shutdown
-const shutdown = () => {
+const shutdown = async () => {
   console.log('Server shutting down...');
-  deviceManager.cleanup();
-  server.close(() => {
-    console.log('Server closed');
-    process.exit(0);
-  });
+  
+  try {
+    // Wait for cleanup to complete
+    await deviceManager.cleanup();
+    console.log('Device cleanup completed');
+    
+    // Close server after cleanup
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  } catch (error) {
+    console.error('Error during shutdown:', error);
+    process.exit(1);
+  }
 };
 
-process.on('SIGINT', shutdown);
-process.on('SIGTERM', shutdown);
+// Use once to prevent multiple shutdown attempts
+process.once('SIGINT', shutdown);
+process.once('SIGTERM', shutdown);
 
 export { app, server };

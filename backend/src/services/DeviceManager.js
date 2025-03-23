@@ -7,6 +7,7 @@ class DeviceManager {
     console.log('DeviceManager instance created');
     this.devices = new Map();
     this.storageFile = path.join(process.cwd(), 'devices.json');
+    this.peers = new Map(); // Track peer connections
     this.loadDevices();
   }
 
@@ -25,7 +26,7 @@ class DeviceManager {
         const deviceId = `${device.name}-${device.ipaddress}`;
         this.devices.set(deviceId, {
           ...device,
-          status: 'online'
+          status: 'offline'
         });
       });
       console.log(`Loaded ${this.devices.size} devices from storage`);
@@ -46,8 +47,7 @@ class DeviceManager {
       const devices = Array.from(this.devices.values()).map(device => ({
         name: device.name,
         ipaddress: device.ipaddress,
-        type: device.type,
-        status: device.status
+        type: device.type
       }));
       await fs.writeFile(this.storageFile, JSON.stringify(devices, null, 2));
       console.log(`Saved ${devices.length} devices to storage`);
@@ -83,8 +83,23 @@ class DeviceManager {
     return Array.from(this.devices.values());
   }
 
-  cleanup() {
-    this.saveDevices();
+  async cleanup() {
+    try {
+      await this.saveDevices();
+      console.log('Device data saved successfully during cleanup');
+    } catch (error) {
+      console.error('Error during device cleanup:', error);
+    }
+  }
+
+  // Add method to handle peer connections
+  async connectToPeer(deviceInfo) {
+    const deviceId = `${deviceInfo.name}-${deviceInfo.ipaddress}`;
+    if (!this.peers.has(deviceId)) {
+      // Establish peer connection
+      // Handle peer communication
+      this.peers.set(deviceId, connection);
+    }
   }
 }
 

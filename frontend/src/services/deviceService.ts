@@ -1,4 +1,4 @@
-import { Device } from "../types/device";
+import { Device, DeviceStatus } from "../types/device";
 import { API_BASE_URL } from "../constants/api";
 
 export const addDevice = async (newDevice: Device): Promise<void> => {
@@ -48,4 +48,22 @@ export const deleteDevice = async (deviceToDelete: Device): Promise<void> => {
 export const sendFiles = (selectedFiles: File[], selectedDevices: Device[]): void => {
   console.log("Sending files:", selectedFiles);
   console.log("To devices:", selectedDevices);
+};
+
+export const getDeviceStatus = async (device: Device): Promise<DeviceStatus> => {
+  const response = await fetch(
+    `${API_BASE_URL}/api/devices/${encodeURIComponent(device.name)}/${encodeURIComponent(device.ipaddress)}/status`,
+    {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error(`HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 };

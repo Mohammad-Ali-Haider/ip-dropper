@@ -2,16 +2,22 @@
   "name": "ip-dropper",
   "private": true,
   "version": "1.0.0",
+  "main": "electron/main.js",
   "workspaces": [
     "frontend",
     "backend"
   ],
   "scripts": {
-    "dev": "concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
-    "build": "npm run build -w frontend",
-    "start": "npm run start -w backend"
+    "start": "electron .",
+    "build": "npm run build -w frontend && electron-builder",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\" \"electron .\"",
+    "dev:web": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
+    "postinstall": "electron-builder install-app-deps"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "cross-env": "^7.0.3",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.0.0"
   }
 }
