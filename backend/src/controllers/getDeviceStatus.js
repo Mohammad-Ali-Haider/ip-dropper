@@ -3,7 +3,7 @@ import ping from 'ping';
 export async function getDeviceStatus(req, res) {
   try {
     const { ip } = req.params;
-    console.log(`Checking status for IP: ${ip}`);
+    // console.log(`Checking status for IP: ${ip}`);
 
     try {
       const pingResult = await ping.promise.probe(ip, {
@@ -17,7 +17,7 @@ export async function getDeviceStatus(req, res) {
         isOnline: pingResult.alive
       };
 
-      console.log('Sending status:', status);
+      // console.log('Sending status:', status);
       res.json(status);
     } catch (pingError) {
       console.error('Ping error:', pingError);
