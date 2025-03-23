@@ -1,4 +1,3 @@
-import { promisify } from "util";
 import fs from "fs/promises";
 import path from "path";
 
@@ -6,7 +5,6 @@ class DeviceManager {
   constructor() {
     console.log("DeviceManager instance created");
     this.devices = new Map();
-    this.connections = new Map(); // WebSocket connections
     this.storageFile = path.join(process.cwd(), "devices.json");
     this.loadDevices();
   }
@@ -85,16 +83,6 @@ class DeviceManager {
     }
   }
 
-  // Add method to handle peer connections
-  async connectToPeer(deviceInfo) {
-    const deviceId = `${deviceInfo.name}-${deviceInfo.ipaddress}`;
-    if (!this.peers.has(deviceId)) {
-      // Establish peer connection
-      // Handle peer communication
-      this.peers.set(deviceId, connection);
-    }
-  }
-
   updateDeviceReceiving(name, ipaddress, isReceiving) {
     const deviceId = `${name}-${ipaddress}`;
     const device = this.devices.get(deviceId);
@@ -120,23 +108,6 @@ class DeviceManager {
       return device;
     }
     return null;
-  }
-
-  // Add a WebSocket connection for a device
-  addConnection(deviceId, ws) {
-    this.connections.set(deviceId, ws);
-    console.log(`WebSocket connection added for device: ${deviceId}`);
-  }
-
-  // Get a WebSocket connection for a device
-  getConnection(deviceId) {
-    return this.connections.get(deviceId);
-  }
-
-  // Remove a WebSocket connection
-  removeConnection(deviceId) {
-    this.connections.delete(deviceId);
-    console.log(`WebSocket connection removed for device: ${deviceId}`);
   }
 }
 

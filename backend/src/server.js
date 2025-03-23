@@ -1,14 +1,11 @@
 import express from 'express';
 import cors from 'cors';
-import { WebSocketServer } from 'ws';
 import { createServer } from 'http';
 import deviceRouter from './routes/deviceRoutes.js';
-import { setupWebSocketHandlers } from './websocket/handlers.js';
 import { deviceManager } from './services/DeviceManager.js';
 
 const app = express();
 const server = createServer(app);
-const wss = new WebSocketServer({ server });
 
 // Middleware
 app.use(cors());
@@ -16,9 +13,6 @@ app.use(express.json());
 
 // Routes
 app.use('/api/devices', deviceRouter);
-
-// WebSocket setup
-setupWebSocketHandlers(wss);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

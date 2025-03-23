@@ -28,17 +28,17 @@ export async function sendFile(req, res) {
     const { path: tempFilePath, originalname, size } = req.file;
 
     // Get the device from DeviceManager
-    const device = deviceManager.getDevices()
-      .find(device => device.ipaddress === ip);
+    // const device = deviceManager.getDevices()
+    //   .find(device => device.ipaddress === ip);
 
-    if (!device) {
-      // Clean up temp file
-      await fs.unlink(tempFilePath).catch(console.error);
-      return res.status(404).json({ 
-        error: 'Device not found',
-        details: `No device found with IP address ${ip}`
-      });
-    }
+    // if (!device) {
+    //   // Clean up temp file
+    //   await fs.unlink(tempFilePath).catch(console.error);
+    //   return res.status(404).json({ 
+    //     error: 'Device not found',
+    //     details: `No device found with IP address ${ip}`
+    //   });
+    // }
 
     try {
       // Get the WebSocket connection for this device
