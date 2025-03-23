@@ -1,10 +1,14 @@
 import express from "express";
 import cors from "cors";
-import { createServer } from "http";
+import http from "http";
+import { setupWebSocketServer } from "./controllers/sendFile.js";
 import deviceRouter from "./routes/deviceRoutes.js";
 
 const app = express();
-const server = createServer(app);
+const server = http.createServer(app);
+
+// Setup WebSocket server
+setupWebSocketServer(server);
 
 // Middleware
 app.use(cors());
