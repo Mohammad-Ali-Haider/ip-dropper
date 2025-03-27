@@ -5,6 +5,31 @@ import os from 'os';
  * @param {Request} req - Express request object
  * @param {Response} res - Express response object
  * @returns {Promise<void>} - Resolves when response is sent
+ * 
+ * Returns device information including:
+ * - Device name (hostname)
+ * - Device type (windows/mac/linux/unknown)
+ * - Network interfaces array containing:
+ *   - Interface name
+ *   - IPv4 address (if available)
+ *   - IPv6 address (if available)
+ *   - Internal status flag
+ * 
+ * Response format success: {
+ *   name: string,
+ *   type: "windows" | "mac" | "linux" | "unknown",
+ *   interfaces: Array<{
+ *     name: string,
+ *     ipv4?: string,
+ *     ipv6?: string,
+ *     isInternal: boolean
+ *   }>
+ * }
+ * 
+ * Response format error: {
+ *   error: string,
+ *   details: string
+ * }
  */
 export function getCurrentDevice(req, res) {
   try {

@@ -20,6 +20,11 @@ function Settings() {
   // Save settings whenever they change
   useEffect(() => {
     localStorage.setItem('settings.refreshRate', refreshRate);
+    // Dispatch storage event for other components
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: 'settings.refreshRate',
+      newValue: refreshRate
+    }));
   }, [refreshRate]);
 
   const handleDelete = () => {

@@ -11,8 +11,6 @@ export async function sendFile(req, res) {
   const file = req.file;
   let socket;
 
-  console.log(`[DEBUG] Attempting to send file to ${ip}:${TRANSFER_PORT}`);
-
   // Get current machine's network interfaces
   const os = await import('os');
   const interfaces = os.networkInterfaces();
@@ -20,14 +18,7 @@ export async function sendFile(req, res) {
     .flat()
     .filter(iface => iface?.family === 'IPv4')
     .map(iface => iface?.address);
-
-  console.log('[DEBUG] Local machine IPs:', localIPs);
-  console.log('[DEBUG] Target IP:', ip);
   
-  if (localIPs.includes(ip)) {
-    console.log('[DEBUG] Target IP is this machine');
-  }
-
   const notifyClients = (status, error = null) => {
     if (req.app.locals.wss) {
       req.app.locals.wss.clients.forEach((client) => {
@@ -55,7 +46,6 @@ export async function sendFile(req, res) {
     
     const connectionPromise = new Promise((resolve, reject) => {
       socket.on('error', (error) => {
-        console.log(`[DEBUG] Socket error:`, error.code, error.message);
         let errorMessage = 'Connection failed';
         if (error.code === 'ECONNREFUSED') {
           errorMessage = `Target device (${ip}) is not accepting connections on port ${TRANSFER_PORT}. Make sure the receiving service is running on the target device.`;
@@ -66,7 +56,6 @@ export async function sendFile(req, res) {
       });
 
       socket.connect(TRANSFER_PORT, ip, () => {
-        console.log(`[DEBUG] Successfully connected to ${ip}:${TRANSFER_PORT}`);
         resolve();
       });
 
@@ -81,7 +70,7 @@ export async function sendFile(req, res) {
       name: file.originalname,
       size: file.size,
       type: file.mimetype,
-      deviceName: os.hostname(), // Add the device name
+      deviceName: os.hostname(),
     };
 
     socket.write(JSON.stringify(fileMetadata) + '\n');
@@ -89,7 +78,6 @@ export async function sendFile(req, res) {
     const fileStream = createReadStream(file.path);
     await pipeline(fileStream, socket);
 
-    // Notify success
     notifyClients('completed');
 
     return res.json({

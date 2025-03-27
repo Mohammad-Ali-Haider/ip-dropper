@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Device } from "../../types/device";
+import { Device, DeviceStatus, DeviceType } from "../../types/device";
 import { getDeviceStatus, getDeviceType } from "../../services/deviceService";
+import { useRefreshRate } from "../../hooks/useRefreshRate";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
 import ConfirmationModal from "../modals/ConfirmationModal";
@@ -32,15 +33,15 @@ function DeviceCard({
   const [editName, setEditName] = useState(name);
   const [editIp, setEditIp] = useState(ipaddress);
   const [error, setError] = useState<string | null>(null);
-  const [deviceStatus, setDeviceStatus] = useState({ isOnline: false });
-  const [deviceType, setDeviceType] = useState("");
+  const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ isOnline: false });
+  const [deviceType, setDeviceType] = useState<DeviceType>("");
+  const refreshRate = useRefreshRate();
 
   useEffect(() => {
     let mounted = true;
     
     const checkStatusAndType = async () => {
       try {
-        // Fetch both status and type
         const [status, type] = await Promise.all([
           getDeviceStatus(ipaddress),
           getDeviceType(ipaddress)
@@ -51,7 +52,6 @@ function DeviceCard({
           setDeviceType(type);
         }
       } catch (error) {
-        console.error("Error checking device status or type:", error);
         if (mounted) {
           setDeviceStatus({ isOnline: false });
           setDeviceType("");
@@ -59,14 +59,14 @@ function DeviceCard({
       }
     };
 
-    const intervalId = setInterval(checkStatusAndType, 5000);
-    checkStatusAndType(); // Initial check
+    checkStatusAndType();
+    const intervalId = setInterval(checkStatusAndType, refreshRate);
 
     return () => {
       mounted = false;
       clearInterval(intervalId);
     };
-  }, [ipaddress]);
+  }, [ipaddress, refreshRate, name]);
 
   const handleCardClick = (e: React.MouseEvent) => {
     // Prevent selection when clicking action buttons

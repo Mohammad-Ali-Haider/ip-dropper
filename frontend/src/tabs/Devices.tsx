@@ -11,12 +11,17 @@ import "../styles/Devices.css";
 
 interface TransferStatus {
   [key: string]: {
-    status: 'initiating' | 'inProgress' | 'completed' | 'failed';
+    status: "initiating" | "inProgress" | "completed" | "failed";
     error?: string;
   };
 }
 
-const TransferStatusItem = ({ fileName, targetIp, status, error }: {
+const TransferStatusItem = ({
+  fileName,
+  targetIp,
+  status,
+  error,
+}: {
   fileName: string;
   targetIp: string;
   status: string;
@@ -24,44 +29,53 @@ const TransferStatusItem = ({ fileName, targetIp, status, error }: {
 }) => {
   const getStatusColor = () => {
     switch (status) {
-      case 'failed': return '#ffebee';
-      case 'completed': return '#e8f5e9';
-      case 'initiating': return '#e3f2fd';
-      default: return '#fff';
+      case "failed":
+        return "#ffebee";
+      case "completed":
+        return "#e8f5e9";
+      case "initiating":
+        return "#e3f2fd";
+      default:
+        return "#fff";
     }
   };
 
   return (
-    <div 
+    <div
       className={`transfer-item status-${status}`}
       style={{
-        padding: '12px',
-        margin: '8px 0',
-        borderRadius: '6px',
+        padding: "12px",
+        margin: "8px 0",
+        borderRadius: "6px",
         backgroundColor: getStatusColor(),
-        border: '1px solid ' + (status === 'failed' ? '#ffcdd2' : '#e0e0e0')
+        border: "1px solid " + (status === "failed" ? "#ffcdd2" : "#e0e0e0"),
       }}
     >
-      <div style={{ fontWeight: 'bold' }}>{fileName}</div>
-      <div style={{ fontSize: '0.9em', color: '#666' }}>Target: {targetIp}</div>
-      <div style={{ 
-        marginTop: '4px',
-        color: status === 'failed' ? '#d32f2f' : 
-               status === 'completed' ? '#2e7d32' : 
-               '#1976d2'
-      }}>
+      <div style={{ fontWeight: "bold" }}>{fileName}</div>
+      <div style={{ fontSize: "0.9em", color: "#666" }}>Target: {targetIp}</div>
+      <div
+        style={{
+          marginTop: "4px",
+          color:
+            status === "failed"
+              ? "#d32f2f"
+              : status === "completed"
+              ? "#2e7d32"
+              : "#1976d2",
+        }}
+      >
         Status: {status.charAt(0).toUpperCase() + status.slice(1)}
       </div>
       {error && (
-        <div 
+        <div
           className="error-message"
           style={{
-            color: '#d32f2f',
-            fontSize: '0.9em',
-            marginTop: '8px',
-            padding: '8px',
-            backgroundColor: '#ffebee',
-            borderRadius: '4px'
+            color: "#d32f2f",
+            fontSize: "0.9em",
+            marginTop: "8px",
+            padding: "8px",
+            backgroundColor: "#ffebee",
+            borderRadius: "4px",
           }}
         >
           {error}
@@ -89,13 +103,13 @@ function Devices() {
 
   useEffect(() => {
     const handleTransferEvent = (event: any) => {
-      if (event.type === 'fileTransfer') {
-        setTransferStatus(prev => ({
+      if (event.type === "fileTransfer") {
+        setTransferStatus((prev) => ({
           ...prev,
           [`${event.fileName}-${event.targetIp}`]: {
             status: event.status,
-            error: event.error
-          }
+            error: event.error,
+          },
         }));
       }
     };
@@ -149,45 +163,49 @@ function Devices() {
       const timestamp = new Date();
 
       // Get existing history
-      const existingHistory = JSON.parse(localStorage.getItem('transfer-history') || '[]');
-      
+      const existingHistory = JSON.parse(
+        localStorage.getItem("transfer-history") || "[]"
+      );
+
       // Group devices by IP address
       const deviceGroups = selectedDevices.reduce((acc, device) => {
         const key = device.ipaddress;
         if (!acc[key]) {
           acc[key] = {
             devices: [],
-            files: selectedFiles.map(f => f.name)
+            files: selectedFiles.map((f) => f.name),
           };
         }
         acc[key].devices.push({
           name: device.name,
-          ipaddress: device.ipaddress
+          ipaddress: device.ipaddress,
         });
         return acc;
-      }, {} as Record<string, { devices: { name: string; ipaddress: string }[], files: string[] }>);
+      }, {} as Record<string, { devices: { name: string; ipaddress: string }[]; files: string[] }>);
 
       // Create new history records
-      const newHistoryRecords = Object.values(deviceGroups).map(group => ({
+      const newHistoryRecords = Object.values(deviceGroups).map((group) => ({
         id: `${timestamp.getTime()}-${Math.random().toString(36).substr(2)}`,
         timestamp,
         files: group.files,
         targetDevices: group.devices,
-        status: 'completed' as const,
-        error: undefined
+        status: "completed" as const,
+        error: undefined,
       }));
 
       // Try to merge with recent records (within 5 minutes)
       const MERGE_WINDOW = 5 * 60 * 1000; // 5 minutes in milliseconds
       const mergedHistory = [...existingHistory];
 
-      newHistoryRecords.forEach(newRecord => {
-        const recentRecordIndex = mergedHistory.findIndex(record => {
-          const timeDiff = timestamp.getTime() - new Date(record.timestamp).getTime();
-          const sameDevices = record.targetDevices.every(device => 
-            newRecord.targetDevices.some(newDevice => 
-              newDevice.ipaddress === device.ipaddress
-            )
+      newHistoryRecords.forEach((newRecord) => {
+        const recentRecordIndex = mergedHistory.findIndex((record) => {
+          const timeDiff =
+            timestamp.getTime() - new Date(record.timestamp).getTime();
+          const sameDevices = record.targetDevices.every(
+            (device: { name: string; ipaddress: string }) =>
+              newRecord.targetDevices.some(
+                (newDevice) => newDevice.ipaddress === device.ipaddress
+              )
           );
           return timeDiff < MERGE_WINDOW && sameDevices;
         });
@@ -198,7 +216,7 @@ function Devices() {
           mergedHistory[recentRecordIndex] = {
             ...existingRecord,
             files: [...new Set([...existingRecord.files, ...newRecord.files])],
-            timestamp: timestamp // Update timestamp to latest
+            timestamp: timestamp, // Update timestamp to latest
           };
         } else {
           // Add as new record
@@ -207,30 +225,34 @@ function Devices() {
       });
 
       // Save to localStorage
-      localStorage.setItem('transfer-history', JSON.stringify(mergedHistory));
+      localStorage.setItem("transfer-history", JSON.stringify(mergedHistory));
 
       // Proceed with sending files
       await sendFiles(selectedFiles, selectedDevices);
       clearFiles();
-
     } catch (error) {
-      console.error('Failed to send files:', error);
-      
+      console.error("Failed to send files:", error);
+
       // Update history with error status
-      const existingHistory = JSON.parse(localStorage.getItem('transfer-history') || '[]');
+      const existingHistory = JSON.parse(
+        localStorage.getItem("transfer-history") || "[]"
+      );
       const failedRecord = {
         id: `${new Date().getTime()}-error`,
         timestamp: new Date(),
-        files: selectedFiles.map(f => f.name),
-        targetDevices: selectedDevices.map(d => ({
+        files: selectedFiles.map((f) => f.name),
+        targetDevices: selectedDevices.map((d) => ({
           name: d.name,
-          ipaddress: d.ipaddress
+          ipaddress: d.ipaddress,
         })),
-        status: 'failed' as const,
-        error: error instanceof Error ? error.message : 'Failed to send files'
+        status: "failed" as const,
+        error: error instanceof Error ? error.message : "Failed to send files",
       };
 
-      localStorage.setItem('transfer-history', JSON.stringify([failedRecord, ...existingHistory]));
+      localStorage.setItem(
+        "transfer-history",
+        JSON.stringify([failedRecord, ...existingHistory])
+      );
     }
   };
 
@@ -280,7 +302,7 @@ function Devices() {
       </div>
       <div className="transfer-status">
         {Object.entries(transferStatus).map(([key, status]) => {
-          const [fileName, targetIp] = key.split('-');
+          const [fileName, targetIp] = key.split("-");
           return (
             <TransferStatusItem
               key={key}
