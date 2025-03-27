@@ -1,6 +1,5 @@
 import express from 'express';
 import fs from 'fs';
-import path from 'path';
 import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from 'ws';
@@ -27,20 +26,6 @@ app.use("/api/devices", deviceRouter);
 // Start the receiver service with both WebSocket server and Express app
 startReceiver(wss, app);
 
-// WebSocket connection handler
-wss.on('connection', (ws) => {
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      if (data.type === 'receiver') {
-        setReceivingState(data.action === 'start');
-      }
-    } catch (error) {
-      console.error('Error processing WebSocket message:', error);
-    }
-  });
-});
-
 // Start the server
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
@@ -58,18 +43,12 @@ const shutdown = async () => {
   console.log("Server shutting down...");
 
   try {
-    // Stop the receiver
     stopReceiver();
 
-    // Close all WebSocket connections
     wss.close(() => {
       console.log('WebSocket server closed');
     });
 
-    // Wait for cleanup to complete
-    console.log("Device cleanup completed");
-
-    // Close server after cleanup
     server.close(() => {
       console.log("Server closed");
       process.exit(0);
