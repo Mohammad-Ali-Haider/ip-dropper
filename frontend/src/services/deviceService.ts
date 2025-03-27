@@ -1,5 +1,6 @@
 import { Device, DeviceStatus, DeviceType } from "../types/device";
 import { API_BASE_URL } from "../constants/api";
+import { websocketService } from "./websocketService";
 
 export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]): Promise<void> => {
   console.log("Sending files:", selectedFiles);
@@ -8,7 +9,14 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
   const sendPromises = selectedDevices.flatMap(device => 
     selectedFiles.map(async file => {
       try {
-        // For Electron, we can use the File object directly
+        // Notify about transfer initiation
+        websocketService.send({
+          type: 'fileTransfer',
+          status: 'initiating',
+          fileName: file.name,
+          targetIp: device.ipaddress
+        });
+
         const formData = new FormData();
         formData.append('file', file);
 
@@ -21,12 +29,16 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
         );
 
         if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-          throw new Error(`Failed to send ${file.name} to ${device.ipaddress}: ${errorData.error || 'Unknown error'}`);
+          const errorData = await response.json();
+          throw new Error(errorData.details || errorData.error || 'Unknown error');
         }
 
-        console.log(`Successfully initiated send of ${file.name} to ${device.ipaddress}`);
+        const result = await response.json();
+        
+        // Success notification is handled by WebSocket events
+        console.log(`Successfully sent ${file.name} to ${device.ipaddress}:`, result);
       } catch (error) {
+        // Error notification is handled by WebSocket events
         console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
         throw error;
       }
@@ -35,10 +47,10 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
 
   try {
     await Promise.all(sendPromises);
-    console.log('All file transfers initiated successfully');
+    console.log('All file transfers completed successfully');
   } catch (error) {
     console.error('Some file transfers failed:', error);
-    throw new Error('Failed to send some files');
+    throw error;
   }
 };
 

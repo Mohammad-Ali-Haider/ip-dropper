@@ -5,6 +5,7 @@ import SidebarContent from "./components/sidebar/SidebarContent";
 import TabContent from "./components/common/TabContent";
 import { PAGES } from "./constants/navigation";
 import { ThemeProvider } from "./context/ThemeContext";
+import { websocketService } from "./services/websocketService";
 import "./styles/App.css";
 import "./styles/markdown.css";
 
@@ -17,6 +18,16 @@ function App() {
     const saved = localStorage.getItem("app.isReceiving");
     return saved ? JSON.parse(saved) : false;
   });
+
+  useEffect(() => {
+    // Initialize WebSocket connection
+    websocketService.connect();
+
+    // Cleanup on unmount
+    return () => {
+      websocketService.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
@@ -45,8 +56,6 @@ function App() {
           page={page}
           activeTab={activeTab}
           index={index}
-          // devices={devices}
-          // setDevices={setDevices}
         />
       ))}
     </div>

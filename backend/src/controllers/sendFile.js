@@ -1,20 +1,114 @@
+import net from 'net';
+import { pipeline } from 'stream/promises';
+import { createReadStream } from 'fs';
+import { WebSocket } from 'ws';
+
+const TRANSFER_PORT = 3001;
+const CONNECTION_TIMEOUT = 5000;
+
 export async function sendFile(req, res) {
+  const { ip } = req.params;
+  const file = req.file;
+  let socket;
+
+  console.log(`[DEBUG] Attempting to send file to ${ip}:${TRANSFER_PORT}`);
+
+  // Get current machine's network interfaces
+  const os = await import('os');
+  const interfaces = os.networkInterfaces();
+  const localIPs = Object.values(interfaces)
+    .flat()
+    .filter(iface => iface?.family === 'IPv4')
+    .map(iface => iface?.address);
+
+  console.log('[DEBUG] Local machine IPs:', localIPs);
+  console.log('[DEBUG] Target IP:', ip);
+  
+  if (localIPs.includes(ip)) {
+    console.log('[DEBUG] Target IP is this machine');
+  }
+
+  const notifyClients = (status, error = null) => {
+    if (req.app.locals.wss) {
+      req.app.locals.wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({
+            type: 'fileTransfer',
+            status,
+            fileName: file?.originalname || req.body.fileName || 'unknown',
+            targetIp: ip,
+            error: error
+          }));
+        }
+      });
+    }
+  };
+
+  if (!file) {
+    const error = 'No file provided';
+    notifyClients('failed', error);
+    return res.status(400).json({ error });
+  }
+
   try {
-    const { ip } = req.params;
+    socket = new net.Socket();
     
-    // Mock successful response
-    res.json({
-      message: 'File transfer simulated successfully',
+    const connectionPromise = new Promise((resolve, reject) => {
+      socket.on('error', (error) => {
+        console.log(`[DEBUG] Socket error:`, error.code, error.message);
+        let errorMessage = 'Connection failed';
+        if (error.code === 'ECONNREFUSED') {
+          errorMessage = `Target device (${ip}) is not accepting connections on port ${TRANSFER_PORT}. Make sure the receiving service is running on the target device.`;
+        } else if (error.code === 'EHOSTUNREACH') {
+          errorMessage = `Target device (${ip}) is unreachable. Check if the device is on the network.`;
+        }
+        reject(new Error(errorMessage));
+      });
+
+      socket.connect(TRANSFER_PORT, ip, () => {
+        console.log(`[DEBUG] Successfully connected to ${ip}:${TRANSFER_PORT}`);
+        resolve();
+      });
+
+      setTimeout(() => {
+        reject(new Error(`Connection to ${ip}:${TRANSFER_PORT} timed out. Check if the target device is available.`));
+      }, CONNECTION_TIMEOUT);
+    });
+
+    await connectionPromise;
+
+    const fileMetadata = {
+      name: file.originalname,
+      size: file.size,
+      type: file.mimetype
+    };
+
+    socket.write(JSON.stringify(fileMetadata) + '\n');
+
+    const fileStream = createReadStream(file.path);
+    await pipeline(fileStream, socket);
+
+    // Notify success
+    notifyClients('completed');
+
+    return res.json({
+      message: 'File transfer completed successfully',
       timestamp: new Date().toISOString(),
       targetIp: ip,
       status: 'completed'
     });
 
   } catch (error) {
-    console.error('Error in sendFile:', error);
-    res.status(500).json({ 
-      error: 'Failed to simulate file send',
-      details: error.message 
+    if (socket) {
+      socket.destroy();
+    }
+
+    console.error('Transfer error:', error);
+    notifyClients('failed', error.message);
+    
+    return res.status(503).json({ 
+      error: 'File transfer failed',
+      details: error.message
     });
   }
 }

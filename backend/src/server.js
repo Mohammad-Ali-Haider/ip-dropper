@@ -1,8 +1,16 @@
-import express from "express";
+import express from 'express';
+import fs from 'fs';
+import path from 'path';
 import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from 'ws';
 import deviceRouter from "./routes/deviceRoutes.js";
+
+// Create upload directory if it doesn't exist
+const uploadDir = '/tmp/ip-dropper-uploads';
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
 const app = express();
 const server = createServer(app);
