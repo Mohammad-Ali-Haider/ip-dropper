@@ -12,12 +12,6 @@ interface NetworkInterface {
   isInternal?: boolean;
 }
 
-interface DeviceInfo {
-  name: string;
-  type: DeviceType;
-  interfaces: NetworkInterface[];
-}
-
 function YourDeviceCard() {
   const [deviceName, setDeviceName] = useState<string>("Loading...");
   const [deviceType, setDeviceType] = useState<DeviceType | "loading">("loading");
