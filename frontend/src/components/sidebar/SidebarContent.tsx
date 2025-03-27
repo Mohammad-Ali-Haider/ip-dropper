@@ -2,6 +2,8 @@ import ListGroup from "../common/ListGroup";
 import YourDeviceCard from "../device/YourDeviceCard";
 import { PAGES } from "../../constants/navigation";
 import { ReceivingButton } from "./components/ReceivingButton";
+import { useEffect } from "react";
+import { websocketService } from "../../services/websocketService";
 
 interface SidebarContentProps {
   isReceiving: boolean;
@@ -16,6 +18,20 @@ function SidebarContent({
   activeTab,
   setActiveTab,
 }: SidebarContentProps) {
+  useEffect(() => {
+    if (isReceiving) {
+      websocketService.send({
+        type: 'receiver',
+        action: 'start'
+      });
+    } else {
+      websocketService.send({
+        type: 'receiver',
+        action: 'stop'
+      });
+    }
+  }, [isReceiving]);
+
   const onReceivingToggle = () => {
     setIsReceiving(!isReceiving);
   };

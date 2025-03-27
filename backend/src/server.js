@@ -5,6 +5,7 @@ import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from 'ws';
 import deviceRouter from "./routes/deviceRoutes.js";
+import { startReceiver, stopReceiver } from './services/receiverService.js';
 
 // Create upload directory if it doesn't exist
 const uploadDir = '/tmp/ip-dropper-uploads';
@@ -42,13 +43,28 @@ wss.on('connection', (ws) => {
 });
 
 function handleWebSocketMessage(ws, data) {
-  // Handle different message types
   switch (data.type) {
+    case 'receiver':
+      handleReceiverControl(data.action);
+      break;
     case 'ping':
       ws.send(JSON.stringify({ type: 'pong' }));
       break;
     default:
       console.log('Received message:', data);
+  }
+}
+
+function handleReceiverControl(action) {
+  switch (action) {
+    case 'start':
+      startReceiver(wss);
+      break;
+    case 'stop':
+      stopReceiver();
+      break;
+    default:
+      console.log('Unknown receiver action:', action);
   }
 }
 
@@ -81,13 +97,15 @@ const shutdown = async () => {
   console.log("Server shutting down...");
 
   try {
+    // Stop the receiver
+    stopReceiver();
+
     // Close all WebSocket connections
     wss.close(() => {
       console.log('WebSocket server closed');
     });
 
     // Wait for cleanup to complete
-    // await deviceManager.cleanup();
     console.log("Device cleanup completed");
 
     // Close server after cleanup
