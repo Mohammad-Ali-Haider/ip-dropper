@@ -5,13 +5,14 @@ interface Props {
   onHide: () => void;
   onConfirm: () => void;
   itemName: string;
+  title?: string;
 }
 
-function ConfirmationModal({ show, onHide, onConfirm, itemName }: Props) {
+function ConfirmationModal({ show, onHide, onConfirm, itemName, title = "Confirm Delete" }: Props) {
   return (
-    <BaseModal show={show} onHide={onHide} title="Confirm Delete">
+    <BaseModal show={show} onHide={onHide} title={title}>
       <div>
-        <p>Are you sure you want to delete device "{itemName}"?</p>
+        <p>Are you sure you want to delete {itemName}? This action cannot be undone.</p>
         <div className="d-flex justify-content-end gap-2">
           <button className="btn btn-secondary" onClick={onHide}>
             Cancel

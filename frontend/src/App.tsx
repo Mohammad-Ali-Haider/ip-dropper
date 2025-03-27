@@ -8,29 +8,34 @@ import { ThemeProvider } from "./context/ThemeContext";
 import { websocketService } from "./services/websocketService";
 import "./styles/App.css";
 import "./styles/markdown.css";
+import "./styles/shared.css";
 
 function App() {
   const [activeTab, setActiveTab] = useState(() => {
     const saved = localStorage.getItem("app.activeTab");
     return saved ? JSON.parse(saved) : 0;
   });
+  
   const [isReceiving, setIsReceiving] = useState(() => {
     const saved = localStorage.getItem("app.isReceiving");
     return saved ? JSON.parse(saved) : false;
   });
 
   useEffect(() => {
-    // Initialize WebSocket connection
     websocketService.connect();
 
-    // Sync initial receiving state with backend
-    websocketService.send({
-      type: 'receiver',
-      action: isReceiving ? 'start' : 'stop'
-    });
+    const syncReceivingState = () => {
+      websocketService.send({
+        type: 'receiver',
+        action: isReceiving ? 'start' : 'stop'
+      });
+    };
 
-    // Cleanup on unmount
+    // Add a small delay to ensure WebSocket is connected
+    const syncTimeout = setTimeout(syncReceivingState, 1000);
+
     return () => {
+      clearTimeout(syncTimeout);
       websocketService.disconnect();
     };
   }, []); // Initial setup
@@ -42,13 +47,10 @@ function App() {
   useEffect(() => {
     localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
     
-    // Sync receiving state with backend whenever it changes
-    if (websocketService) {
-      websocketService.send({
-        type: 'receiver',
-        action: isReceiving ? 'start' : 'stop'
-      });
-    }
+    websocketService.send({
+      type: 'receiver',
+      action: isReceiving ? 'start' : 'stop'
+    });
   }, [isReceiving]);
 
   const sidebarContent = (

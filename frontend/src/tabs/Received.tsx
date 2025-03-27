@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Modal } from 'react-bootstrap';
 import { websocketService } from '../services/websocketService';
 import '../styles/Received.css';
 
@@ -16,7 +17,6 @@ interface TransferGroup {
   };
   timestamp: Date;
   files: FileInfo[];
-  isExpanded: boolean;
 }
 
 function Received() {
@@ -38,6 +38,7 @@ function Received() {
       return [];
     }
   });
+  const [selectedGroup, setSelectedGroup] = useState<TransferGroup | null>(null);
 
   useEffect(() => {
     const handleFileAvailable = (event: any) => {
@@ -90,14 +91,6 @@ function Received() {
     return () => websocketService.removeEventListener(handleFileAvailable);
   }, []);
 
-  const toggleExpand = (index: number) => {
-    setTransferGroups(prev => 
-      prev.map((group, i) => 
-        i === index ? { ...group, isExpanded: !group.isExpanded } : group
-      )
-    );
-  };
-
   const formatFileSize = (bytes: number): string => {
     const units = ['B', 'KB', 'MB', 'GB'];
     let size = bytes;
@@ -117,6 +110,18 @@ function Received() {
       day: 'numeric',
       month: 'short',
       year: 'numeric'
+    }).format(date);
+  };
+
+  const formatDetailedTimestamp = (date: Date): string => {
+    return new Intl.DateTimeFormat('default', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+      hour12: true
     }).format(date);
   };
 
@@ -147,60 +152,103 @@ function Received() {
       {transferGroups.map((group, index) => (
         <div 
           key={`${group.sourceDevice.ipAddress}-${group.timestamp.getTime()}`}
-          className={`transfer-group ${group.isExpanded ? 'expanded' : ''}`}
-          onClick={() => toggleExpand(index)}
+          className="list-item-card"
         >
-          <div className="transfer-group-header">
-            <div className="source-info">
-              <i className="fas fa-desktop"></i>
-              <span className="device-name">{group.sourceDevice.name}</span>
-              <span className="device-ip">({group.sourceDevice.ipAddress})</span>
+          <div className="item-left" onClick={() => setSelectedGroup(group)}>
+            <div className="item-timestamp">
+              <i className="fas fa-clock"></i>
+              {formatTimestamp(group.timestamp)}
             </div>
-            <div className="transfer-meta">
-              <span className="timestamp">{formatTimestamp(group.timestamp)}</span>
+            <div className="item-brief">
               <span className="file-count">
-                {group.files.length} file{group.files.length !== 1 ? 's' : ''}
+                <i className="fas fa-file"></i>
+                {group.files.length} file{group.files.length !== 1 ? 's' : ''} from{' '}
+                <strong>{group.sourceDevice.name}</strong>
               </span>
-              <button 
-                className="delete-group-btn"
-                onClick={(e) => deleteTransferGroup(index, e)}
-                title="Delete transfer group"
-              >
-                <i className="fas fa-trash"></i>
-              </button>
-              <i className={`fas fa-chevron-${group.isExpanded ? 'up' : 'down'}`}></i>
             </div>
           </div>
-          
-          {group.isExpanded && (
-            <div className="transfer-details">
-              {group.files.map(file => (
-                <div 
-                  key={`${file.fileName}-${file.timestamp.getTime()}`}
-                  className="file-item"
-                >
-                  <div className="file-info">
-                    <i className="fas fa-file"></i>
-                    <span className="file-name">{file.fileName}</span>
-                    <span className="file-size">{formatFileSize(file.fileSize)}</span>
-                  </div>
-                  <div className="file-actions">
-                    <a 
-                      href={`${file.downloadUrl}`}
-                      className="download-link"
-                      onClick={(e) => e.stopPropagation()}
-                      download
-                    >
-                      <i className="fas fa-download"></i>
-                      Download
-                    </a>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="item-right">
+            <button 
+              className="info-btn" 
+              onClick={() => setSelectedGroup(group)}
+              title="View details"
+            >
+              <i className="fas fa-info-circle"></i>
+            </button>
+            <button 
+              className="delete-history-btn" 
+              onClick={(e) => deleteTransferGroup(index, e)}
+              title="Delete this record"
+            >
+              <i className="fas fa-trash"></i>
+            </button>
+          </div>
         </div>
       ))}
+
+      <Modal
+        show={selectedGroup !== null}
+        onHide={() => setSelectedGroup(null)}
+        centered
+        className="received-detail-modal"
+      >
+        {selectedGroup && (
+          <>
+            <Modal.Header closeButton>
+              <Modal.Title>Received Files</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+              <div className="received-detail-content">
+                <div className="detail-section">
+                  <div className="detail-header">
+                    <i className="fas fa-desktop"></i>
+                    <span>Source Device</span>
+                  </div>
+                  <div className="detail-value">
+                    {selectedGroup.sourceDevice.name} ({selectedGroup.sourceDevice.ipAddress})
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <div className="detail-header">
+                    <i className="fas fa-clock"></i>
+                    <span>Timestamp</span>
+                  </div>
+                  <div className="detail-value">
+                    {formatDetailedTimestamp(selectedGroup.timestamp)}
+                  </div>
+                </div>
+
+                <div className="detail-section">
+                  <div className="detail-header">
+                    <i className="fas fa-file"></i>
+                    <span>Files</span>
+                  </div>
+                  <div className="files-list">
+                    {selectedGroup.files.map(file => (
+                      <div key={`${file.fileName}-${file.timestamp.getTime()}`} className="file-item">
+                        <div className="file-info">
+                          <span className="file-name">{file.fileName}</span>
+                          <span className="file-size">{formatFileSize(file.fileSize)}</span>
+                        </div>
+                        <a 
+                          href={file.downloadUrl}
+                          className="download-link"
+                          download
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <i className="fas fa-download"></i>
+                          Download
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Modal.Body>
+          </>
+        )}
+      </Modal>
     </div>
   );
 }

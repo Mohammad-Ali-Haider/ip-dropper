@@ -1,45 +1,50 @@
 import { useState, useEffect } from "react";
 import { useTheme } from "../context/ThemeContext";
+import ConfirmationModal from "../components/modals/ConfirmationModal";
 import "../styles/Settings.css";
 
 function Settings() {
   const { theme, setTheme } = useTheme();
-  const [autoConnect, setAutoConnect] = useState(() => {
-    const saved = localStorage.getItem('settings.autoConnect');
-    return saved ? JSON.parse(saved) : true;
-  });
-  
-  const [notifications, setNotifications] = useState(() => {
-    const saved = localStorage.getItem('settings.notifications');
-    return saved ? JSON.parse(saved) : true;
-  });
-  
-  const [deviceLimit, setDeviceLimit] = useState(() => {
-    const saved = localStorage.getItem('settings.deviceLimit');
-    return saved || "50";
-  });
-  
   const [refreshRate, setRefreshRate] = useState(() => {
     const saved = localStorage.getItem('settings.refreshRate');
     return saved || "5";
   });
 
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteAction, setDeleteAction] = useState<{
+    type: 'devices' | 'history' | 'received';
+    title: string;
+  } | null>(null);
+
   // Save settings whenever they change
-  useEffect(() => {
-    localStorage.setItem('settings.autoConnect', JSON.stringify(autoConnect));
-  }, [autoConnect]);
-
-  useEffect(() => {
-    localStorage.setItem('settings.notifications', JSON.stringify(notifications));
-  }, [notifications]);
-
-  useEffect(() => {
-    localStorage.setItem('settings.deviceLimit', deviceLimit);
-  }, [deviceLimit]);
-
   useEffect(() => {
     localStorage.setItem('settings.refreshRate', refreshRate);
   }, [refreshRate]);
+
+  const handleDelete = () => {
+    if (!deleteAction) return;
+
+    switch (deleteAction.type) {
+      case 'devices':
+        localStorage.removeItem('devices');
+        break;
+      case 'history':
+        localStorage.removeItem('transfer-history');
+        break;
+      case 'received':
+        localStorage.removeItem('received-transfers');
+        break;
+    }
+    
+    setShowDeleteModal(false);
+    window.location.reload();
+  };
+
+  const showDeleteConfirmation = (type: 'devices' | 'history' | 'received', title: string) => {
+    setDeleteAction({ type, title });
+    setShowDeleteModal(true);
+  };
 
   return (
     <div className="settings-container">
@@ -71,21 +76,6 @@ function Settings() {
         <h3>Connection</h3>
         <div className="setting-item">
           <div className="setting-label">
-            <span>Auto-Connect Devices</span>
-            <span className="setting-description">Automatically connect to previously paired devices</span>
-          </div>
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={autoConnect}
-              onChange={(e) => setAutoConnect(e.target.checked)}
-            />
-            <span className="slider"></span>
-          </label>
-        </div>
-
-        <div className="setting-item">
-          <div className="setting-label">
             <span>Device Refresh Rate</span>
             <span className="setting-description">How often to check device status (seconds)</span>
           </div>
@@ -102,45 +92,47 @@ function Settings() {
         </div>
       </div>
 
-      {/* Notification Settings */}
+      {/* Memory Management Section */}
       <div className="settings-section">
-        <h3>Notifications</h3>
+        <h3>Memory Management</h3>
         <div className="setting-item">
           <div className="setting-label">
-            <span>Enable Notifications</span>
-            <span className="setting-description">Get notified when devices connect or disconnect</span>
+            <span>Clear Application Data</span>
+            <span className="setting-description">Delete stored data to free up memory</span>
           </div>
-          <label className="switch">
-            <input
-              type="checkbox"
-              checked={notifications}
-              onChange={(e) => setNotifications(e.target.checked)}
-            />
-            <span className="slider"></span>
-          </label>
+          <div className="memory-management-buttons">
+            <button 
+              className="danger-button" 
+              onClick={() => showDeleteConfirmation('devices', 'all devices')}
+            >
+              <i className="fas fa-trash-alt"></i>
+              Delete All Devices
+            </button>
+            <button 
+              className="danger-button" 
+              onClick={() => showDeleteConfirmation('history', 'transfer history')}
+            >
+              <i className="fas fa-history"></i>
+              Clear Transfer History
+            </button>
+            <button 
+              className="danger-button" 
+              onClick={() => showDeleteConfirmation('received', 'received files history')}
+            >
+              <i className="fas fa-inbox"></i>
+              Clear Received Files
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Device Management */}
-      <div className="settings-section">
-        <h3>Device Management</h3>
-        <div className="setting-item">
-          <div className="setting-label">
-            <span>Device Limit</span>
-            <span className="setting-description">Maximum number of devices to track</span>
-          </div>
-          <select
-            value={deviceLimit}
-            onChange={(e) => setDeviceLimit(e.target.value)}
-            className="setting-select"
-          >
-            <option value="10">10 devices</option>
-            <option value="25">25 devices</option>
-            <option value="50">50 devices</option>
-            <option value="100">100 devices</option>
-          </select>
-        </div>
-      </div>
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        show={showDeleteModal}
+        onHide={() => setShowDeleteModal(false)}
+        onConfirm={handleDelete}
+        itemName={deleteAction?.title || ''}
+      />
     </div>
   );
 }

@@ -18,20 +18,6 @@ function SidebarContent({
   activeTab,
   setActiveTab,
 }: SidebarContentProps) {
-  useEffect(() => {
-    if (isReceiving) {
-      websocketService.send({
-        type: 'receiver',
-        action: 'start'
-      });
-    } else {
-      websocketService.send({
-        type: 'receiver',
-        action: 'stop'
-      });
-    }
-  }, [isReceiving]);
-
   const onReceivingToggle = () => {
     setIsReceiving(!isReceiving);
   };
