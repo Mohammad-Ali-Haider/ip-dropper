@@ -6,51 +6,61 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
   console.log("Sending files:", selectedFiles);
   console.log("To devices:", selectedDevices);
 
-  const sendPromises = selectedDevices.flatMap(device => 
-    selectedFiles.map(async file => {
-      try {
-        // Notify about transfer initiation
-        websocketService.send({
-          type: 'fileTransfer',
-          status: 'initiating',
-          fileName: file.name,
-          targetIp: device.ipaddress
-        });
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await fetch(
-          `${API_BASE_URL}/api/devices/${encodeURIComponent(device.ipaddress)}/send`,
-          {
-            method: 'POST',
-            body: formData,
-          }
-        );
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.details || errorData.error || 'Unknown error');
-        }
-
-        const result = await response.json();
-        
-        // Success notification is handled by WebSocket events
-        console.log(`Successfully sent ${file.name} to ${device.ipaddress}:`, result);
-      } catch (error) {
-        // Error notification is handled by WebSocket events
-        console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
-        throw error;
-      }
-    })
+  // Create an array of all file-device combinations
+  const transfers = selectedDevices.flatMap(device =>
+    selectedFiles.map(file => ({ device, file }))
   );
 
-  try {
-    await Promise.all(sendPromises);
-    console.log('All file transfers completed successfully');
-  } catch (error) {
-    console.error('Some file transfers failed:', error);
-    throw error;
+  // Process transfers sequentially to avoid overwhelming the server
+  for (const { device, file } of transfers) {
+    try {
+      // Notify about transfer initiation
+      websocketService.send({
+        type: 'fileTransfer',
+        status: 'initiating',
+        fileName: file.name,
+        targetIp: device.ipaddress
+      });
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(
+        `${API_BASE_URL}/api/devices/${encodeURIComponent(device.ipaddress)}/send`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.details || errorData.error || 'Unknown error');
+      }
+
+      const result = await response.json();
+      console.log(`Successfully sent ${file.name} to ${device.ipaddress}:`, result);
+    } catch (error) {
+      console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
+      // Don't throw here - continue with next transfer
+      websocketService.send({
+        type: 'fileTransfer',
+        status: 'failed',
+        fileName: file.name,
+        targetIp: device.ipaddress,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      });
+    }
+  }
+
+  // Check if any transfers failed
+  const failedTransfers = transfers.filter(({ file, device }) => {
+    const status = document.querySelector(`[data-transfer="${file.name}-${device.ipaddress}"]`)?.getAttribute('data-status');
+    return status === 'failed';
+  });
+
+  if (failedTransfers.length > 0) {
+    throw new Error('Some file transfers failed');
   }
 };
 
