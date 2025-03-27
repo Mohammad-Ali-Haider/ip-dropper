@@ -15,7 +15,7 @@ function App() {
     const saved = localStorage.getItem("app.activeTab");
     return saved ? JSON.parse(saved) : 0;
   });
-  
+
   const [isReceiving, setIsReceiving] = useState(() => {
     const saved = localStorage.getItem("app.isReceiving");
     return saved ? JSON.parse(saved) : false;
@@ -26,8 +26,8 @@ function App() {
 
     const syncReceivingState = () => {
       websocketService.send({
-        type: 'receiver',
-        action: isReceiving ? 'start' : 'stop'
+        type: "receiver",
+        action: isReceiving ? "start" : "stop",
       });
     };
 
@@ -46,10 +46,10 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
-    
+
     websocketService.send({
-      type: 'receiver',
-      action: isReceiving ? 'start' : 'stop'
+      type: "receiver",
+      action: isReceiving ? "start" : "stop",
     });
   }, [isReceiving]);
 

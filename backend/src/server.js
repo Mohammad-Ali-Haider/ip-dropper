@@ -12,33 +12,39 @@ if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
 
+// Initialize Express app and create HTTP server
 const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Make sure all middleware is set up before starting the receiver
+// Configure middleware
 app.use(express.json());
 app.use(cors());
 
-// Routes setup
+// Mount device-related routes under /api/devices
 app.use("/api/devices", deviceRouter);
 
-// Start the receiver service with both WebSocket server and Express app
+// Initialize file receiver service
 startReceiver(wss, app);
 
-// Start the server
+// Start server on specified port or default to 3000
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
-// Error handling
+// Global error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong!" });
 });
 
-// Graceful shutdown
+/**
+ * Handles graceful shutdown of the server
+ * - Stops the receiver service
+ * - Closes WebSocket connections
+ * - Shuts down HTTP server
+ */
 const shutdown = async () => {
   console.log("Server shutting down...");
 
@@ -59,8 +65,8 @@ const shutdown = async () => {
   }
 };
 
-// Use once to prevent multiple shutdown attempts
-process.once("SIGINT", shutdown);
-process.once("SIGTERM", shutdown);
+// Register shutdown handlers for system signals
+process.once("SIGINT", shutdown);  // Ctrl+C
+process.once("SIGTERM", shutdown); // Kill command
 
 export { app, server };
