@@ -17,68 +17,15 @@ const app = express();
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
 
-// Middleware
-app.use(cors());
+// Make sure all middleware is set up before starting the receiver
 app.use(express.json());
+app.use(cors());
 
-// WebSocket connection handling
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      handleWebSocketMessage(ws, data);
-    } catch (error) {
-      console.error('Error handling WebSocket message:', error);
-    }
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-
-  // Send initial connection confirmation
-  ws.send(JSON.stringify({ type: 'connected', message: 'WebSocket connection established' }));
-});
-
-function handleWebSocketMessage(ws, data) {
-  switch (data.type) {
-    case 'receiver':
-      handleReceiverControl(data.action);
-      break;
-    case 'ping':
-      ws.send(JSON.stringify({ type: 'pong' }));
-      break;
-    default:
-      console.log('Received message:', data);
-  }
-}
-
-function handleReceiverControl(action) {
-  switch (action) {
-    case 'start':
-      startReceiver(wss);
-      break;
-    case 'stop':
-      stopReceiver();
-      break;
-    default:
-      console.log('Unknown receiver action:', action);
-  }
-}
-
-// Broadcast to all connected clients
-function broadcast(data) {
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
-}
-
-// Routes
+// Routes setup
 app.use("/api/devices", deviceRouter);
+
+// Start the receiver service with both WebSocket server and Express app
+startReceiver(wss, app);
 
 // Start the server
 const PORT = process.env.PORT || 3000;

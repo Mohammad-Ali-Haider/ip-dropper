@@ -9,7 +9,16 @@ interface FileTransferEvent {
   error?: string;
 }
 
-type WebSocketEventListener = (event: FileTransferEvent) => void;
+interface FileAvailableEvent {
+  type: 'fileAvailable';
+  fileName: string;
+  fileSize: number;
+  downloadUrl: string;
+  expiresIn: number;
+}
+
+type WebSocketEvent = FileTransferEvent | FileAvailableEvent;
+type WebSocketEventListener = (event: WebSocketEvent) => void;
 
 class WebSocketService {
   private ws: WebSocket | null = null;
@@ -45,8 +54,20 @@ class WebSocketService {
 
     this.ws.onmessage = (event) => {
       try {
-        const data = JSON.parse(event.data);
-        this.handleMessage(data);
+        const data = JSON.parse(event.data) as WebSocketEvent;
+        
+        if (data.type === 'fileAvailable') {
+          // Trigger download automatically
+          const downloadUrl = `${API_BASE_URL}${data.downloadUrl}`;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = data.fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        
+        this.eventListeners.forEach(listener => listener(data));
       } catch (error) {
         console.error('Error parsing WebSocket message:', error);
       }
@@ -65,9 +86,24 @@ class WebSocketService {
     }, delay);
   }
 
-  private handleMessage(data: FileTransferEvent) {
-    if (data.type === 'fileTransfer') {
+  private handleMessage(event: MessageEvent) {
+    try {
+      const data = JSON.parse(event.data) as WebSocketEvent;
+      
+      if (data.type === 'fileAvailable') {
+        // Trigger download automatically
+        const downloadUrl = `${API_BASE_URL}${data.downloadUrl}`;
+        const link = document.createElement('a');
+        link.href = downloadUrl;
+        link.download = data.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      
       this.eventListeners.forEach(listener => listener(data));
+    } catch (error) {
+      console.error('Error parsing WebSocket message:', error);
     }
   }
 

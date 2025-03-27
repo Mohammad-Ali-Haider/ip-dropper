@@ -1,15 +1,22 @@
 import net from 'net';
 import { WebSocket } from 'ws';
-import fs from 'fs';
-import path from 'path';
-import os from 'os';
+import express from 'express';
+import { Readable } from 'stream';
 
 const TRANSFER_PORT = 3001;
-const DOWNLOAD_DIR = path.join(os.homedir(), 'Downloads');
-console.log('[DEBUG] Files will be saved to:', DOWNLOAD_DIR);
 let server = null;
+let expressApp = null;
+// Map to store download data
+const downloads = new Map();
 
-export function startReceiver(wss) {
+export function startReceiver(wss, app) {
+  if (!app) {
+    console.error('[DEBUG] Express app not provided to startReceiver');
+    return;
+  }
+
+  expressApp = app;
+
   if (server) {
     console.log('[DEBUG] Receiver already running');
     return;
@@ -18,45 +25,31 @@ export function startReceiver(wss) {
   server = net.createServer((socket) => {
     console.log('[DEBUG] Client connected for file transfer');
     let fileMetadata = null;
-    let dataBuffer = '';
+    let dataChunks = [];
 
     socket.on('data', (data) => {
       try {
         if (!fileMetadata) {
-          // Accumulate data until we find a newline
-          dataBuffer += data.toString();
-          const newlineIndex = dataBuffer.indexOf('\n');
-          
-          if (newlineIndex !== -1) {
-            // Extract metadata from buffer
-            const metadataStr = dataBuffer.slice(0, newlineIndex);
+          // Try to parse the metadata from the first chunk
+          const metadataStr = data.toString().split('\n')[0];
+          try {
             fileMetadata = JSON.parse(metadataStr);
-            console.log('[DEBUG] Received file metadata:', fileMetadata);
-
-            // Notify clients about incoming file
-            broadcastToClients(wss, {
-              type: 'fileReceive',
-              status: 'initiating',
-              fileName: fileMetadata.name,
-              size: fileMetadata.size,
-              sourceIp: socket.remoteAddress.replace(/^.*:/, '')
-            });
-
-            // Remove metadata from buffer
-            dataBuffer = dataBuffer.slice(newlineIndex + 1);
+            if (!fileMetadata || !fileMetadata.name) {
+              console.error('[DEBUG] Invalid file metadata received');
+              return;
+            }
+          } catch (parseError) {
+            console.error('[DEBUG] Error parsing metadata:', parseError);
+            return;
           }
-        }
-
-        if (fileMetadata && data.length > 0) {
-          console.log('[DEBUG] Received file chunk:', data.length, 'bytes');
-          // Get the file extension from the original filename
-          const fileExtension = path.extname(fileMetadata.name);
-          // Create new filename as "testing" with the original extension
-          const newFileName = `testing${fileExtension}`;
-          // Save the file to Downloads folder with new name
-          const filePath = path.join(DOWNLOAD_DIR, newFileName);
-          console.log('[DEBUG] Saving file to:', filePath);
-          fs.appendFileSync(filePath, data);
+          
+          // Remove metadata from the first chunk
+          const remainingData = Buffer.from(data.slice(metadataStr.length + 1));
+          if (remainingData.length > 0) {
+            dataChunks.push(remainingData);
+          }
+        } else {
+          dataChunks.push(data);
         }
       } catch (error) {
         console.error('[DEBUG] Error processing received data:', error);
@@ -64,69 +57,117 @@ export function startReceiver(wss) {
     });
 
     socket.on('end', () => {
-      console.log('[DEBUG] Transfer completed');
-      if (fileMetadata) {
-        broadcastToClients(wss, {
-          type: 'fileReceive',
-          status: 'completed',
-          fileName: fileMetadata.name,
-          sourceIp: socket.remoteAddress.replace(/^.*:/, '')
+      if (!fileMetadata || !fileMetadata.name || dataChunks.length === 0) {
+        console.error('[DEBUG] Missing file metadata or data chunks');
+        return;
+      }
+
+      try {
+        if (!expressApp) {
+          throw new Error('Express app not available');
+        }
+
+        const completeFileBuffer = Buffer.concat(dataChunks);
+        const downloadId = Date.now().toString(36) + Math.random().toString(36).substr(2);
+        
+        // Store download data
+        downloads.set(downloadId, {
+          metadata: fileMetadata,
+          buffer: completeFileBuffer
         });
+
+        // Set up download route
+        expressApp.get(`/download/${downloadId}`, (req, res) => {
+          try {
+            const downloadData = downloads.get(downloadId);
+            if (!downloadData) {
+              console.error('[DEBUG] Download data not found for ID:', downloadId);
+              return res.status(404).send('Download not found or expired');
+            }
+
+            const { metadata, buffer } = downloadData;
+            
+            res.setHeader('Content-Disposition', `attachment; filename="${metadata.name}"`);
+            res.setHeader('Content-Type', metadata.type || 'application/octet-stream');
+            res.setHeader('Content-Length', buffer.length);
+            
+            const stream = new Readable();
+            stream.push(buffer);
+            stream.push(null);
+            stream.pipe(res);
+            
+            // Clean up after successful download
+            setTimeout(() => {
+              try {
+                // Remove download data
+                downloads.delete(downloadId);
+                
+                // Remove the route
+                const routeIndex = expressApp._router.stack.findIndex(
+                  (layer) => layer.route && layer.route.path === `/download/${downloadId}`
+                );
+                if (routeIndex !== -1) {
+                  expressApp._router.stack.splice(routeIndex, 1);
+                }
+              } catch (cleanupError) {
+                console.error('[DEBUG] Error cleaning up download:', cleanupError);
+              }
+            }, 60000); // Clean up after 1 minute
+          } catch (responseError) {
+            console.error('[DEBUG] Error sending file response:', responseError);
+            res.status(500).send('Error processing file download');
+          }
+        });
+
+        if (wss) {
+          const notification = {
+            type: 'fileAvailable',
+            fileName: fileMetadata.name,
+            fileSize: completeFileBuffer.length,
+            downloadUrl: `/download/${downloadId}`,
+            expiresIn: 60
+          };
+
+          wss.clients.forEach((client) => {
+            if (client.readyState === WebSocket.OPEN) {
+              try {
+                client.send(JSON.stringify(notification));
+              } catch (wsError) {
+                console.error('[DEBUG] Error sending WebSocket notification:', wsError);
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error('[DEBUG] Error processing file end:', error);
+      } finally {
+        dataChunks = [];
+        fileMetadata = null;
       }
     });
 
     socket.on('error', (error) => {
       console.error('[DEBUG] Socket error:', error);
-      if (fileMetadata) {
-        broadcastToClients(wss, {
-          type: 'fileReceive',
-          status: 'failed',
-          fileName: fileMetadata.name,
-          sourceIp: socket.remoteAddress.replace(/^.*:/, ''),
-          error: error.message
-        });
-      }
+      dataChunks = [];
+      fileMetadata = null;
     });
   });
 
   server.listen(TRANSFER_PORT, () => {
-    console.log(`[DEBUG] File receiver service listening on port ${TRANSFER_PORT}`);
-    broadcastToClients(wss, {
-      type: 'receiver',
-      status: 'started'
-    });
+    console.log(`[DEBUG] File receiver listening on port ${TRANSFER_PORT}`);
   });
 
-  server.on('error', (err) => {
-    console.error('[DEBUG] Server error:', err);
-    if (err.code === 'EADDRINUSE') {
-      console.log(`[DEBUG] Port ${TRANSFER_PORT} is already in use`);
-    }
-    broadcastToClients(wss, {
-      type: 'receiver',
-      status: 'error',
-      error: err.message
-    });
+  server.on('error', (error) => {
+    console.error('[DEBUG] Server error:', error);
   });
-
-  return server;
 }
 
 export function stopReceiver() {
   if (server) {
-    server.close(() => {
-      console.log('[DEBUG] Receiver stopped');
-      server = null;
-    });
+    server.close();
+    server = null;
   }
-}
-
-function broadcastToClients(wss, data) {
-  if (!wss) return;
-  
-  wss.clients.forEach((client) => {
-    if (client.readyState === WebSocket.OPEN) {
-      client.send(JSON.stringify(data));
-    }
-  });
+  // Clear all downloads when stopping
+  downloads.clear();
+  expressApp = null;
 }
