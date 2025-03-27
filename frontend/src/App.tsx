@@ -23,11 +23,17 @@ function App() {
     // Initialize WebSocket connection
     websocketService.connect();
 
+    // Sync initial receiving state with backend
+    websocketService.send({
+      type: 'receiver',
+      action: isReceiving ? 'start' : 'stop'
+    });
+
     // Cleanup on unmount
     return () => {
       websocketService.disconnect();
     };
-  }, []);
+  }, []); // Initial setup
 
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
@@ -35,6 +41,14 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
+    
+    // Sync receiving state with backend whenever it changes
+    if (websocketService) {
+      websocketService.send({
+        type: 'receiver',
+        action: isReceiving ? 'start' : 'stop'
+      });
+    }
   }, [isReceiving]);
 
   const sidebarContent = (
