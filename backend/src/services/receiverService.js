@@ -140,6 +140,10 @@ export function startReceiver(wss, app) {
             fileName: fileMetadata.name,
             fileSize: completeFileBuffer.length,
             downloadUrl: `/download/${downloadId}`,
+            sourceDevice: {
+              name: fileMetadata.deviceName || 'Unknown Device', // Add device name from metadata
+              ipAddress: socket.remoteAddress?.replace('::ffff:', '') || 'Unknown IP'
+            },
             expiresIn: 60
           };
 

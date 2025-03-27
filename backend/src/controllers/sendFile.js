@@ -80,7 +80,8 @@ export async function sendFile(req, res) {
     const fileMetadata = {
       name: file.originalname,
       size: file.size,
-      type: file.mimetype
+      type: file.mimetype,
+      deviceName: os.hostname(), // Add the device name
     };
 
     socket.write(JSON.stringify(fileMetadata) + '\n');
