@@ -5,7 +5,7 @@ import cors from "cors";
 import { createServer } from "http";
 import { WebSocketServer } from 'ws';
 import deviceRouter from "./routes/deviceRoutes.js";
-import { startReceiver, stopReceiver } from './services/receiverService.js';
+import { startReceiver, stopReceiver, setReceivingState } from './services/receiverService.js';
 
 // Create upload directory if it doesn't exist
 const uploadDir = '/tmp/ip-dropper-uploads';
@@ -26,6 +26,20 @@ app.use("/api/devices", deviceRouter);
 
 // Start the receiver service with both WebSocket server and Express app
 startReceiver(wss, app);
+
+// WebSocket connection handler
+wss.on('connection', (ws) => {
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      if (data.type === 'receiver') {
+        setReceivingState(data.action === 'start');
+      }
+    } catch (error) {
+      console.error('Error processing WebSocket message:', error);
+    }
+  });
+});
 
 // Start the server
 const PORT = process.env.PORT || 3000;

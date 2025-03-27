@@ -91,14 +91,19 @@ class WebSocketService {
       const data = JSON.parse(event.data) as WebSocketEvent;
       
       if (data.type === 'fileAvailable') {
-        // Trigger download automatically
-        const downloadUrl = `${API_BASE_URL}${data.downloadUrl}`;
-        const link = document.createElement('a');
-        link.href = downloadUrl;
-        link.download = data.fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Check if receiving is enabled before auto-downloading
+        const isReceiving = localStorage.getItem("app.isReceiving");
+        if (isReceiving === "true") {
+          const downloadUrl = `${API_BASE_URL}${data.downloadUrl}`;
+          const link = document.createElement('a');
+          link.href = downloadUrl;
+          link.download = data.fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } else {
+          console.log('File available but receiving is disabled:', data.fileName);
+        }
       }
       
       this.eventListeners.forEach(listener => listener(data));

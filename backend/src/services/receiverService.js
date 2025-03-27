@@ -6,8 +6,16 @@ import { Readable } from 'stream';
 const TRANSFER_PORT = 3001;
 let server = null;
 let expressApp = null;
-// Map to store download data
 const downloads = new Map();
+let isReceiving = false; // Add receiving state
+
+export function setReceivingState(state) {
+  isReceiving = state;
+  if (!isReceiving) {
+    // Clear all downloads when receiving is disabled
+    downloads.clear();
+  }
+}
 
 export function startReceiver(wss, app) {
   if (!app) {
@@ -23,6 +31,13 @@ export function startReceiver(wss, app) {
   }
 
   server = net.createServer((socket) => {
+    // Check if receiving is enabled before accepting connection
+    if (!isReceiving) {
+      console.log('[DEBUG] Receiving is disabled, rejecting connection');
+      socket.end();
+      return;
+    }
+
     console.log('[DEBUG] Client connected for file transfer');
     let fileMetadata = null;
     let dataChunks = [];
@@ -153,6 +168,22 @@ export function startReceiver(wss, app) {
     });
   });
 
+  // Add WebSocket handler for receiving state changes
+  if (wss) {
+    wss.on('connection', (ws) => {
+      ws.on('message', (message) => {
+        try {
+          const data = JSON.parse(message);
+          if (data.type === 'receiver') {
+            setReceivingState(data.action === 'start');
+          }
+        } catch (error) {
+          console.error('[DEBUG] Error processing WebSocket message:', error);
+        }
+      });
+    });
+  }
+
   server.listen(TRANSFER_PORT, () => {
     console.log(`[DEBUG] File receiver listening on port ${TRANSFER_PORT}`);
   });
@@ -167,7 +198,7 @@ export function stopReceiver() {
     server.close();
     server = null;
   }
-  // Clear all downloads when stopping
   downloads.clear();
   expressApp = null;
+  isReceiving = false;
 }
