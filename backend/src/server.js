@@ -1,14 +1,57 @@
 import express from "express";
 import cors from "cors";
 import { createServer } from "http";
+import { WebSocketServer } from 'ws';
 import deviceRouter from "./routes/deviceRoutes.js";
 
 const app = express();
 const server = createServer(app);
+const wss = new WebSocketServer({ server });
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// WebSocket connection handling
+wss.on('connection', (ws) => {
+  console.log('Client connected');
+
+  ws.on('message', (message) => {
+    try {
+      const data = JSON.parse(message);
+      handleWebSocketMessage(ws, data);
+    } catch (error) {
+      console.error('Error handling WebSocket message:', error);
+    }
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+
+  // Send initial connection confirmation
+  ws.send(JSON.stringify({ type: 'connected', message: 'WebSocket connection established' }));
+});
+
+function handleWebSocketMessage(ws, data) {
+  // Handle different message types
+  switch (data.type) {
+    case 'ping':
+      ws.send(JSON.stringify({ type: 'pong' }));
+      break;
+    default:
+      console.log('Received message:', data);
+  }
+}
+
+// Broadcast to all connected clients
+function broadcast(data) {
+  wss.clients.forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(JSON.stringify(data));
+    }
+  });
+}
 
 // Routes
 app.use("/api/devices", deviceRouter);
@@ -30,6 +73,11 @@ const shutdown = async () => {
   console.log("Server shutting down...");
 
   try {
+    // Close all WebSocket connections
+    wss.close(() => {
+      console.log('WebSocket server closed');
+    });
+
     // Wait for cleanup to complete
     // await deviceManager.cleanup();
     console.log("Device cleanup completed");
