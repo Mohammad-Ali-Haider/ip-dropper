@@ -10,76 +10,76 @@ import "./styles/App.css";
 import "./styles/markdown.css";
 import "./styles/shared.css";
 
+/**
+ * Root component of the application.
+ * Manages the application's main layout, theme, and websocket connection.
+ * 
+ * Features:
+ * - Persists active tab and receiving state in localStorage
+ * - Manages WebSocket connection for file transfer functionality
+ * - Handles theme provider wrapper
+ * - Controls main layout with sidebar and content area
+ */
 function App() {
-  const [activeTab, setActiveTab] = useState(() => {
-    const saved = localStorage.getItem("app.activeTab");
-    return saved ? JSON.parse(saved) : 0;
-  });
+  // Initialize active tab from localStorage, defaulting to 0
+  const [activeTab, setActiveTab] = useState(() => 
+    JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
+  );
 
-  const [isReceiving, setIsReceiving] = useState(() => {
-    const saved = localStorage.getItem("app.isReceiving");
-    return saved ? JSON.parse(saved) : false;
-  });
+  // Initialize receiving state from localStorage, defaulting to false
+  const [isReceiving, setIsReceiving] = useState(() => 
+    JSON.parse(localStorage.getItem("app.isReceiving") ?? "false")
+  );
 
+  // Establish WebSocket connection on mount
   useEffect(() => {
     websocketService.connect();
+    return () => websocketService.disconnect();
+  }, []);
 
-    const syncReceivingState = () => {
-      websocketService.send({
-        type: "receiver",
-        action: isReceiving ? "start" : "stop",
-      });
-    };
-
-    // Add a small delay to ensure WebSocket is connected
-    const syncTimeout = setTimeout(syncReceivingState, 1000);
-
-    return () => {
-      clearTimeout(syncTimeout);
-      websocketService.disconnect();
-    };
-  }, []); // Initial setup
-
+  // Persist active tab changes to localStorage
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);
 
+  // Persist receiving state changes and notify WebSocket server
   useEffect(() => {
     localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
-
-    websocketService.send({
-      type: "receiver",
-      action: isReceiving ? "start" : "stop",
-    });
+    
+    if (websocketService.getConnectionStatus()) {
+      websocketService.send({
+        type: "receiver",
+        action: isReceiving ? "start" : "stop",
+      });
+    }
   }, [isReceiving]);
-
-  const sidebarContent = (
-    <Sidebar>
-      <SidebarContent
-        isReceiving={isReceiving}
-        setIsReceiving={setIsReceiving}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-      />
-    </Sidebar>
-  );
-
-  const mainContent = (
-    <div className="tab-content">
-      {PAGES.map((page, index) => (
-        <TabContent
-          key={page}
-          page={page}
-          activeTab={activeTab}
-          index={index}
-        />
-      ))}
-    </div>
-  );
 
   return (
     <ThemeProvider>
-      <MainLayout sidebar={sidebarContent} content={mainContent} />
+      <MainLayout 
+        sidebar={
+          <Sidebar>
+            <SidebarContent
+              isReceiving={isReceiving}
+              setIsReceiving={setIsReceiving}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+          </Sidebar>
+        }
+        content={
+          <div className="tab-content">
+            {PAGES.map((page, index) => (
+              <TabContent
+                key={page}
+                page={page}
+                activeTab={activeTab}
+                index={index}
+              />
+            ))}
+          </div>
+        }
+      />
     </ThemeProvider>
   );
 }

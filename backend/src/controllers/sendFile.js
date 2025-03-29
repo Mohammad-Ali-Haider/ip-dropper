@@ -51,6 +51,8 @@ export async function sendFile(req, res) {
           errorMessage = `Target device (${ip}) is not accepting connections on port ${TRANSFER_PORT}. Make sure the receiving service is running on the target device.`;
         } else if (error.code === 'EHOSTUNREACH') {
           errorMessage = `Target device (${ip}) is unreachable. Check if the device is on the network.`;
+        } else if (error.code === 'ERR_STREAM_PREMATURE_CLOSE') {
+          errorMessage = `Target device (${ip}) rejected the connection. Check if file receiving is enabled on the target device.`;
         }
         reject(new Error(errorMessage));
       });

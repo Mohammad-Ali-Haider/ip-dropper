@@ -41,7 +41,18 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.details || errorData.error || 'Unknown error');
+        console.error(`Failed to send ${file.name} to ${device.ipaddress}:`, errorData.details || errorData.error);
+        
+        // Update history for this specific failed transfer
+        updateTransferHistory({
+          ...historyRecord,
+          status: 'failed',
+          error: `Failed to send to ${device.ipaddress}: ${errorData.details || errorData.error}`,
+          failedDevices: [device]
+        });
+        
+        // Continue with next transfer instead of breaking
+        continue;
       }
 
       const result = await response.json();
@@ -50,22 +61,27 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
     } catch (error) {
       console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
       
-      // Update the history record with error status
-      const currentHistory = JSON.parse(localStorage.getItem('transfer-history') || '[]');
-      const updatedRecord = {
+      // Update history for this specific failed transfer
+      updateTransferHistory({
         ...historyRecord,
-        status: 'failed' as const,
-        error: error instanceof Error ? error.message : 'Unknown error'
-      };
+        status: 'partial',
+        error: `Failed to send to ${device.ipaddress}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        failedDevices: [device]
+      });
       
-      const newHistory = [
-        updatedRecord,
-        ...currentHistory.filter((record: any) => record.id !== historyRecord.id)
-      ];
-      
-      localStorage.setItem('transfer-history', JSON.stringify(newHistory));
-      break; // Stop processing remaining transfers if there's an error
+      // Continue with next transfer instead of breaking
+      continue;
     }
+  }
+
+  // Helper function to update transfer history
+  function updateTransferHistory(record: any) {
+    const currentHistory = JSON.parse(localStorage.getItem('transfer-history') || '[]');
+    const newHistory = [
+      record,
+      ...currentHistory.filter((r: any) => r.id !== record.id)
+    ];
+    localStorage.setItem('transfer-history', JSON.stringify(newHistory));
   }
 };
 

@@ -29,6 +29,11 @@ class WebSocketService {
   private messageQueue: any[] = [];
   private isConnected = false;
 
+  // Add public method to check connection status
+  public getConnectionStatus(): boolean {
+    return this.isConnected;
+  }
+
   connect() {
     if (this.ws?.readyState === WebSocket.OPEN) return;
 
