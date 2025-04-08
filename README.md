@@ -24,14 +24,20 @@ At the root of the project, run:
 npm install
 ```
 
-This installs all necessary dependencies for the frontend, backend, and Electron app.
+This installs all necessary dependencies for the frontend, backend.
 
 ### 3. Run the Application
 
 To start the Electron app with both frontend and backend:
 
 ```bash
-npm start
+npm run dev
+```
+
+or
+
+```bash
+npm run dev:web
 ```
 
 This will launch the desktop application.
@@ -47,8 +53,3 @@ root/
 ├── package.json      # Root package.json with scripts and dependencies
 └── README.md         # This file
 ```
-
-## Notes
-
-- The Electron app automatically starts the backend server.
-- The frontend UI is loaded inside the Electron window.
