@@ -4,6 +4,7 @@ export type DeviceType = "windows" | "mac" | "linux" | "";
 export interface Device {
   name: string;
   ipaddress: string;
+  status?: 'online' | 'offline';
   // type: DeviceType;
 }
 

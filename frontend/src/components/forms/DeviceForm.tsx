@@ -1,5 +1,4 @@
 import { Form } from 'react-bootstrap';
-import { Device } from '../../types/device';
 
 interface Props {
   name: string;
