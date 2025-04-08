@@ -22,14 +22,12 @@ import "./styles/shared.css";
  */
 function App() {
   // Initialize active tab from localStorage, defaulting to 0
-  const [activeTab, setActiveTab] = useState(() => 
+  const [activeTab, setActiveTab] = useState(() =>
     JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
   );
 
-  // Initialize receiving state from localStorage, defaulting to false
-  const [isReceiving, setIsReceiving] = useState(() => 
-    JSON.parse(localStorage.getItem("app.isReceiving") ?? "false")
-  );
+  // Initialize receiving state to false, no persistence
+  const [isReceiving, setIsReceiving] = useState(false);
 
   // Establish WebSocket connection on mount
   useEffect(() => {
@@ -42,10 +40,8 @@ function App() {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);
 
-  // Persist receiving state changes and notify WebSocket server
+  // Notify WebSocket server when receiving state changes
   useEffect(() => {
-    localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
-    
     if (websocketService.getConnectionStatus()) {
       websocketService.send({
         type: "receiver",
@@ -56,7 +52,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <MainLayout 
+      <MainLayout
         sidebar={
           <Sidebar>
             <SidebarContent
