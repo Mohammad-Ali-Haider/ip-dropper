@@ -55,6 +55,12 @@ IP Dropper is a cross-platform desktop application that allows seamless file tra
 
 ---
 
+## Important: Port Usage
+
+Make sure that **ports 3000 and 3001** on your machine are free and not occupied by other applications. The frontend development server runs on port **3000**, and the backend server runs on port **3001** by default. If these ports are in use, the application may fail to start properly.
+
+---
+
 ## Getting Started
 
 ### 1. Clone the Repository
