@@ -6,6 +6,7 @@ import TabContent from "./components/common/TabContent";
 import { PAGES } from "./constants/navigation";
 import { ThemeProvider } from "./context/ThemeContext";
 import { websocketService } from "./services/websocketService";
+import useReceiving from "./hooks/useReceiving";
 import "./styles/App.css";
 import "./styles/markdown.css";
 import "./styles/shared.css";
@@ -21,20 +22,13 @@ import "./styles/shared.css";
  * - Controls main layout with sidebar and content area
  */
 function App() {
-  // Always reset receiving state to false on app load
-  useEffect(() => {
-    localStorage.setItem("app.isReceiving", "false");
-  }, []);
 
   // Initialize active tab from localStorage, defaulting to 0
   const [activeTab, setActiveTab] = useState(() =>
     JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
   );
 
-  // Initialize receiving state from localStorage, defaulting to false
-  const [isReceiving, setIsReceiving] = useState(() =>
-    JSON.parse(localStorage.getItem("app.isReceiving") ?? "false")
-  );
+  const [isReceiving, setIsReceiving] = useReceiving();
 
   // Establish WebSocket connection on mount
   useEffect(() => {
@@ -47,17 +41,6 @@ function App() {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);
 
-  // Persist receiving state changes and notify WebSocket server
-  useEffect(() => {
-    localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
-    
-    if (websocketService.getConnectionStatus()) {
-      websocketService.send({
-        type: "receiver",
-        action: isReceiving ? "start" : "stop",
-      });
-    }
-  }, [isReceiving]);
 
   return (
     <ThemeProvider>
