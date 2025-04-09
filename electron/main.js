@@ -13,7 +13,7 @@ function createWindow() {
 
   // Always load from dev server during npm run dev
   win.loadURL('http://localhost:5173');
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);

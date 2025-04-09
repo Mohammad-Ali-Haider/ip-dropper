@@ -21,13 +21,20 @@ import "./styles/shared.css";
  * - Controls main layout with sidebar and content area
  */
 function App() {
+  // Always reset receiving state to false on app load
+  useEffect(() => {
+    localStorage.setItem("app.isReceiving", "false");
+  }, []);
+
   // Initialize active tab from localStorage, defaulting to 0
   const [activeTab, setActiveTab] = useState(() =>
     JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
   );
 
-  // Initialize receiving state to false, no persistence
-  const [isReceiving, setIsReceiving] = useState(false);
+  // Initialize receiving state from localStorage, defaulting to false
+  const [isReceiving, setIsReceiving] = useState(() =>
+    JSON.parse(localStorage.getItem("app.isReceiving") ?? "false")
+  );
 
   // Establish WebSocket connection on mount
   useEffect(() => {
@@ -40,8 +47,10 @@ function App() {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);
 
-  // Notify WebSocket server when receiving state changes
+  // Persist receiving state changes and notify WebSocket server
   useEffect(() => {
+    localStorage.setItem("app.isReceiving", JSON.stringify(isReceiving));
+    
     if (websocketService.getConnectionStatus()) {
       websocketService.send({
         type: "receiver",
