@@ -2,7 +2,6 @@ import net from 'net';
 
 const TRANSFER_PORT = 3001;
 
-// Create a simple TCP server
 const server = net.createServer((socket) => {
   console.log('Client connected');
   
