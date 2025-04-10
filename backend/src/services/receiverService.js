@@ -102,7 +102,8 @@ export function startReceiver(wss, app) {
 
             const { metadata, buffer } = downloadData;
             
-            res.setHeader('Content-Disposition', `attachment; filename="${metadata.name}"`);
+            // Serve inline to avoid forced download
+            res.setHeader('Content-Disposition', `inline; filename="${metadata.name}"`);
             res.setHeader('Content-Type', metadata.type || 'application/octet-stream');
             res.setHeader('Content-Length', buffer.length);
             
