@@ -75,8 +75,6 @@ function App() {
 
   // Establish WebSocket connection on mount
   useEffect(() => {
-    websocketService.connect();
-
     websocketService.setOnFileAvailable((file) => {
       setIncomingFiles((prev) => [...prev, {
         fileName: file.fileName,
@@ -85,6 +83,8 @@ function App() {
       }]);
       setShowIncomingModal(true);
     });
+
+    websocketService.connect();
 
     return () => websocketService.disconnect();
   }, []);
