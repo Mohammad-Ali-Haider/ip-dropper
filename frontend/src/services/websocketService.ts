@@ -29,6 +29,12 @@ class WebSocketService {
   private messageQueue: any[] = [];
   private isConnected = false;
 
+  private _onFileAvailable: ((file: FileAvailableEvent) => void) | null = null;
+
+  public setOnFileAvailable(callback: (file: FileAvailableEvent) => void) {
+    this._onFileAvailable = callback;
+  }
+
   // Add public method to check connection status
   public getConnectionStatus(): boolean {
     return this.isConnected;
@@ -96,18 +102,11 @@ class WebSocketService {
       const data = JSON.parse(event.data) as WebSocketEvent;
       
       if (data.type === 'fileAvailable') {
-        // Check if receiving is enabled before auto-downloading
         const isReceiving = localStorage.getItem("app.isReceiving");
-        if (isReceiving === "true") {
-          const downloadUrl = `${API_BASE_URL}${data.downloadUrl}`;
-          const link = document.createElement('a');
-          link.href = downloadUrl;
-          link.download = data.fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
+        if (isReceiving === "true" && this._onFileAvailable) {
+          this._onFileAvailable(data);
         } else {
-          console.log('File available but receiving is disabled:', data.fileName);
+          console.log('File available but receiving is disabled or no handler set:', data.fileName);
         }
       }
       

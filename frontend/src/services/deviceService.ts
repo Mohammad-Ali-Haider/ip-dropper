@@ -12,7 +12,7 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
       name: device.name,
       ipaddress: device.ipaddress
     })),
-    status: 'completed' as const
+    status: 'initiating' as const
   };
 
   // Add to history immediately
@@ -24,6 +24,8 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
   const transfers = selectedDevices.flatMap(device =>
     selectedFiles.map(file => ({ device, file }))
   );
+
+  let anyFailures = false;
 
   // Process transfers
   for (const { device, file } of transfers) {
@@ -43,6 +45,8 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
         const errorData = await response.json();
         console.error(`Failed to send ${file.name} to ${device.ipaddress}:`, errorData.details || errorData.error);
         
+        anyFailures = true;
+
         // Update history for this specific failed transfer
         updateTransferHistory({
           ...historyRecord,
@@ -51,7 +55,6 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
           failedDevices: [device]
         });
         
-        // Continue with next transfer instead of breaking
         continue;
       }
 
@@ -61,6 +64,8 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
     } catch (error) {
       console.error(`Error sending ${file.name} to ${device.ipaddress}:`, error);
       
+      anyFailures = true;
+
       // Update history for this specific failed transfer
       updateTransferHistory({
         ...historyRecord,
@@ -69,10 +74,15 @@ export const sendFiles = async (selectedFiles: File[], selectedDevices: Device[]
         failedDevices: [device]
       });
       
-      // Continue with next transfer instead of breaking
       continue;
     }
   }
+
+  // After all transfers, update overall status
+  updateTransferHistory({
+    ...historyRecord,
+    status: anyFailures ? 'partial' : 'completed'
+  });
 
   // Helper function to update transfer history
   function updateTransferHistory(record: any) {

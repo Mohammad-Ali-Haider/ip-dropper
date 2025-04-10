@@ -21,18 +21,71 @@ import "./styles/shared.css";
  * - Handles theme provider wrapper
  * - Controls main layout with sidebar and content area
  */
+import IncomingFilesModal from "./components/modals/IncomingFilesModal";
+
 function App() {
+  const [incomingFiles, setIncomingFiles] = useState<
+    { fileName: string; fileSize: number; downloadUrl: string }[]
+  >([]);
+  const [showIncomingModal, setShowIncomingModal] = useState(false);
+
+  const handleAccept = (file: { fileName: string; fileSize: number; downloadUrl: string }) => {
+    const link = document.createElement('a');
+    link.href = file.downloadUrl;
+    link.download = file.fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    setIncomingFiles((prev) => prev.filter((f) => f.downloadUrl !== file.downloadUrl));
+    if (incomingFiles.length === 1) setShowIncomingModal(false);
+  };
+
+  const handleReject = (file: { fileName: string; fileSize: number; downloadUrl: string }) => {
+    setIncomingFiles((prev) => prev.filter((f) => f.downloadUrl !== file.downloadUrl));
+    if (incomingFiles.length === 1) setShowIncomingModal(false);
+  };
+
+  const handleAcceptAll = () => {
+    incomingFiles.forEach((file) => {
+      const link = document.createElement('a');
+      link.href = file.downloadUrl;
+      link.download = file.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
+    setIncomingFiles([]);
+    setShowIncomingModal(false);
+  };
+
+  const handleRejectAll = () => {
+    setIncomingFiles([]);
+    setShowIncomingModal(false);
+  };
 
   // Initialize active tab from localStorage, defaulting to 0
-  const [activeTab, setActiveTab] = useState(() =>
-    JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
-  );
+  // const [activeTab, setActiveTab] = useState(() =>
+  //   JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
+  // );
+
+  const [activeTab, setActiveTab] = useState(0);
 
   const [isReceiving, setIsReceiving] = useReceiving();
 
   // Establish WebSocket connection on mount
   useEffect(() => {
     websocketService.connect();
+
+    websocketService.setOnFileAvailable((file) => {
+      setIncomingFiles((prev) => [...prev, {
+        fileName: file.fileName,
+        fileSize: file.fileSize,
+        downloadUrl: `${import.meta.env.VITE_API_BASE_URL || ""}${file.downloadUrl}`
+      }]);
+      setShowIncomingModal(true);
+    });
+
     return () => websocketService.disconnect();
   }, []);
 
@@ -67,6 +120,15 @@ function App() {
             ))}
           </div>
         }
+      />
+      <IncomingFilesModal
+        show={showIncomingModal}
+        files={incomingFiles}
+        onAccept={handleAccept}
+        onReject={handleReject}
+        onAcceptAll={handleAcceptAll}
+        onRejectAll={handleRejectAll}
+        onHide={() => setShowIncomingModal(false)}
       />
     </ThemeProvider>
   );

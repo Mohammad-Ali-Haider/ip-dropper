@@ -1,0 +1,53 @@
+.incoming-files-list {
+  list-style: none;
+  padding: 0;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.incoming-file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  padding: 10px;
+  border: 1px solid #282828;
+  border-radius: 8px;
+  background-color: #505050;
+}
+
+.incoming-file-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.incoming-file-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.incoming-file-buttons button {
+  border: none;
+  background: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+.incoming-file-buttons button.accept-btn {
+  color: #28a745;
+}
+
+.incoming-file-buttons button.accept-btn:hover {
+  background-color: #d4edda;
+}
+
+.incoming-file-buttons button.reject-btn {
+  color: #dc3545;
+}
+
+.incoming-file-buttons button.reject-btn:hover {
+  background-color: #f8d7da;
+}

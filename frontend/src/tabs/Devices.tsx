@@ -6,10 +6,7 @@ import { UploadArea } from "../components/fileupload/UploadArea";
 import { useFileSelection } from "../hooks/useFileSelection";
 import { Device } from "../types/device";
 import { sendFiles } from "../services/deviceService";
-// import { websocketService } from "../services/websocketService";
 import "../styles/Devices.css";
-
-
 
 function Devices() {
   const [devices, setDevices] = useState<Device[]>(() => {
@@ -65,99 +62,11 @@ function Devices() {
 
   const handleSendFiles = async () => {
     try {
-      const timestamp = new Date();
-
-      // Get existing history
-      const existingHistory = JSON.parse(
-        localStorage.getItem("transfer-history") || "[]"
-      );
-
-      // Group devices by IP address
-      const deviceGroups = selectedDevices.reduce((acc, device) => {
-        const key = device.ipaddress;
-        if (!acc[key]) {
-          acc[key] = {
-            devices: [],
-            files: selectedFiles.map((f) => f.name),
-          };
-        }
-        acc[key].devices.push({
-          name: device.name,
-          ipaddress: device.ipaddress,
-        });
-        return acc;
-      }, {} as Record<string, { devices: { name: string; ipaddress: string }[]; files: string[] }>);
-
-      // Create new history records
-      const newHistoryRecords = Object.values(deviceGroups).map((group) => ({
-        id: `${timestamp.getTime()}-${Math.random().toString(36).substr(2)}`,
-        timestamp,
-        files: group.files,
-        targetDevices: group.devices,
-        status: "completed" as const,
-        error: undefined,
-      }));
-
-      // Try to merge with recent records (within 5 minutes)
-      const MERGE_WINDOW = 5 * 60 * 1000; // 5 minutes in milliseconds
-      const mergedHistory = [...existingHistory];
-
-      newHistoryRecords.forEach((newRecord) => {
-        const recentRecordIndex = mergedHistory.findIndex((record) => {
-          const timeDiff =
-            timestamp.getTime() - new Date(record.timestamp).getTime();
-          const sameDevices = record.targetDevices.every(
-            (device: { name: string; ipaddress: string }) =>
-              newRecord.targetDevices.some(
-                (newDevice) => newDevice.ipaddress === device.ipaddress
-              )
-          );
-          return timeDiff < MERGE_WINDOW && sameDevices;
-        });
-
-        if (recentRecordIndex !== -1) {
-          // Merge with existing record
-          const existingRecord = mergedHistory[recentRecordIndex];
-          mergedHistory[recentRecordIndex] = {
-            ...existingRecord,
-            files: [...new Set([...existingRecord.files, ...newRecord.files])],
-            timestamp: timestamp, // Update timestamp to latest
-          };
-        } else {
-          // Add as new record
-          mergedHistory.unshift(newRecord);
-        }
-      });
-
-      // Save to localStorage
-      localStorage.setItem("transfer-history", JSON.stringify(mergedHistory));
-
-      // Proceed with sending files
       await sendFiles(selectedFiles, selectedDevices);
       clearFiles();
     } catch (error) {
       console.error("Failed to send files:", error);
 
-      // Update history with error status
-      const existingHistory = JSON.parse(
-        localStorage.getItem("transfer-history") || "[]"
-      );
-      const failedRecord = {
-        id: `${new Date().getTime()}-error`,
-        timestamp: new Date(),
-        files: selectedFiles.map((f) => f.name),
-        targetDevices: selectedDevices.map((d) => ({
-          name: d.name,
-          ipaddress: d.ipaddress,
-        })),
-        status: "failed" as const,
-        error: error instanceof Error ? error.message : "Failed to send files",
-      };
-
-      localStorage.setItem(
-        "transfer-history",
-        JSON.stringify([failedRecord, ...existingHistory])
-      );
     }
   };
 

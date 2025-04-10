@@ -133,3 +133,22 @@ root/
 ## License
 
 This project is licensed under the MIT License.
+
+## Data Flow Diagram
+
+```mermaid
+flowchart LR
+    subgraph Sender
+      FE[Sender Frontend]
+      BE[Sender Backend]
+    end
+
+    subgraph Reciever
+      RFE[Reciever Frontend]
+      RBE[Reciever Backend]
+    end
+
+    FE --> BE
+    BE --> RBE
+    RBE --> RFE
+```
