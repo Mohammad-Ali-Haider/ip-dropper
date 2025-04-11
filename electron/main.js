@@ -1,15 +1,51 @@
 const { app, BrowserWindow } = require("electron");
 const path = require("path");
 const { fork } = require("child_process");
+const fs = require("fs");
+const { dialog } = require("electron");
 
 let backendProcess;
 
 function startBackend() {
-  const backendPath = path.join(__dirname, "../backend/src/server.js");
+  const isPackaged = app.isPackaged;
+  const backendSourceRelativePath = "backend/src/server.js";
+
+  const backendPath = isPackaged
+    ? path.join(app.getAppPath(), backendSourceRelativePath)
+    : path.join(__dirname, "..", backendSourceRelativePath);
+
+  console.log(
+    `[Main Process] Attempting to start backend from: ${backendPath}`
+  );
+  console.log(`[Main Process] app.getAppPath(): ${app.getAppPath()}`);
+  console.log(`[Main Process] __dirname: ${__dirname}`);
+  console.log(`[Main Process] isPackaged: ${isPackaged}`);
+
+  try {
+    fs.accessSync(backendPath);
+  } catch (error) {
+    console.error(
+      `[Main Process] Error: Backend script not found at ${backendPath}. Check build configuration (e.g., electron-builder 'files'/'extraResources').`,
+      error
+    );
+    dialog.showErrorBox(
+      "Startup Error",
+      `Failed to locate the backend process script at:\n${backendPath}\n\nPlease check the installation or contact support.`
+    );
+    app.quit();
+    return;
+  }
+
   backendProcess = fork(backendPath, [], {
-    // Pass necessary environment variables if needed
-    // env: { ...process.env, YOUR_VAR: 'value' },
-    // silent: true // Set to true to pipe stdout/stderr, false to inherit
+    stdio: "pipe",
+  });
+
+  backendProcess.stdout.on("data", (data) => {
+    console.log(`[Backend STDOUT]: ${data.toString().trim()}`);
+  });
+
+  backendProcess.stderr.on("data", (data) => {
+    console.error(`[Backend STDERR]: ${data.toString().trim()}`);
   });
 
   backendProcess.on("message", (msg) => {
@@ -17,17 +53,17 @@ function startBackend() {
   });
 
   backendProcess.on("error", (err) => {
-    console.error("Backend process error:", err);
+    console.error("[Main Process] Backend process error event:", err);
   });
 
   backendProcess.on("exit", (code, signal) => {
     console.log(
-      `Backend process exited with code ${code} and signal ${signal}`
+      `[Main Process] Backend process exited with code ${code} and signal ${signal}`
     );
-    // Optionally restart or handle the exit
+    backendProcess = null;
   });
 
-  console.log("Backend process started.");
+  console.log("[Main Process] Backend process fork initiated.");
 }
 
 function createWindow() {
