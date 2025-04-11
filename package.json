@@ -47,12 +47,6 @@
     "linux": {
       "icon": "frontend/public/logo.png",
       "target": ["AppImage", "deb"]
-    },
-    "nsis": {
-      "include": "build/installer.nsh",
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "perMachine": true
     }
   },
   "devDependencies": {
