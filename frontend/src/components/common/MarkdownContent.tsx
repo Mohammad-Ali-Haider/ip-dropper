@@ -1,26 +1,16 @@
-import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 interface Props {
-  contentPath: string;
+  contentString: string; // Changed prop name
 }
 
-function MarkdownContent({ contentPath }: Props) {
-  const [content, setContent] = useState("");
-
-  useEffect(() => {
-    fetch(contentPath)
-      .then((response) => response.text())
-      .then((text) => setContent(text))
-      .catch((error) =>
-        console.error("Error loading markdown content:", error)
-      );
-  }, [contentPath]);
+function MarkdownContent({ contentString }: Props) {
+  // Removed useState and useEffect for fetching
 
   return (
     <div className="markdown-content">
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{contentString}</ReactMarkdown>
     </div>
   );
 }

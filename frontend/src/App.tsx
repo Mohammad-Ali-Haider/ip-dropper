@@ -65,11 +65,11 @@ function App() {
   };
 
   // Initialize active tab from localStorage, defaulting to 0
-  // const [activeTab, setActiveTab] = useState(() =>
-  //   JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
-  // );
+  const [activeTab, setActiveTab] = useState(() =>
+    JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
+  );
 
-  const [activeTab, setActiveTab] = useState(0);
+  // const [activeTab, setActiveTab] = useState(0);
 
   const [isReceiving, setIsReceiving] = useReceiving();
 

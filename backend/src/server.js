@@ -1,13 +1,17 @@
-import express from 'express';
-import fs from 'fs';
+import express from "express";
+import fs from "fs";
 import cors from "cors";
 import { createServer } from "http";
-import { WebSocketServer } from 'ws';
+import { WebSocketServer } from "ws";
 import deviceRouter from "./routes/deviceRoutes.js";
-import { startReceiver, stopReceiver, setReceivingState } from './services/receiverService.js';
+import {
+  startReceiver,
+  stopReceiver,
+  setReceivingState,
+} from "./services/receiverService.js";
 
 // Create upload directory if it doesn't exist
-const uploadDir = '/tmp/ip-dropper-uploads';
+const uploadDir = "/tmp/ip-dropper-uploads";
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -52,7 +56,7 @@ const shutdown = async () => {
     stopReceiver();
 
     wss.close(() => {
-      console.log('WebSocket server closed');
+      console.log("WebSocket server closed");
     });
 
     server.close(() => {
@@ -66,7 +70,7 @@ const shutdown = async () => {
 };
 
 // Register shutdown handlers for system signals
-process.once("SIGINT", shutdown);  // Ctrl+C
+process.once("SIGINT", shutdown); // Ctrl+C
 process.once("SIGTERM", shutdown); // Kill command
 
 export { app, server };

@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react"; // Added useCallback
 import { DeviceType } from "../../types/device";
 import "../../styles/YourDeviceCard.css";
 import { API_BASE_URL } from "../../constants/api";
 import { detectClientInfo, getDeviceIcon } from "./deviceUtils";
 import NetworkInterfacesModal from "./NetworkInterfacesModal";
+import { useRefreshRate } from "../../hooks/useRefreshRate"; // Import the hook
 
 interface NetworkInterface {
   name: string;
@@ -17,36 +18,49 @@ function YourDeviceCard() {
   const [deviceType, setDeviceType] = useState<DeviceType | "loading">("loading");
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [showModal, setShowModal] = useState(false);
+  const refreshRate = useRefreshRate(); // Get refresh rate from hook
+
+  // Wrap fetchDeviceInfo in useCallback to prevent re-creation on every render
+  // Define it outside useEffect
+  const fetchDeviceInfo = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/devices/current`, {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setDeviceName(data.name);
+      setDeviceType(data.type);
+      setInterfaces(data.interfaces || []);
+    } catch (error) {
+      console.error("Error fetching device info:", error);
+      // Fallback to client-side detection if API fails
+      const { deviceType: detectedType, deviceName: detectedName } =
+        detectClientInfo();
+      setDeviceType(detectedType);
+      setDeviceName(detectedName);
+    }
+  }, []); // Empty dependency array as it doesn't depend on props or state outside its scope
 
   useEffect(() => {
-    const fetchDeviceInfo = async () => {
-      try {
-        const response = await fetch(`${API_BASE_URL}/api/devices/current`, {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        });
 
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const data = await response.json();
-        setDeviceName(data.name);
-        setDeviceType(data.type);
-        setInterfaces(data.interfaces || []);
-      } catch (error) {
-        console.error("Error fetching device info:", error);
-        const { deviceType: detectedType, deviceName: detectedName } =
-          detectClientInfo();
-        setDeviceType(detectedType);
-        setDeviceName(detectedName);
-      }
-    };
-
+    // Fetch immediately on mount
     fetchDeviceInfo();
-  }, []);
+
+    // Set up interval based on refreshRate
+    const intervalId = setInterval(fetchDeviceInfo, refreshRate);
+
+    // Clear interval on component unmount or when refreshRate changes
+    return () => clearInterval(intervalId);
+
+  }, [fetchDeviceInfo, refreshRate]); // Re-run effect if fetchDeviceInfo or refreshRate changes
 
   return (
     <>
