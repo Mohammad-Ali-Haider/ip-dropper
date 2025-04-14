@@ -38,10 +38,29 @@ function startBackend() {
 
   backendProcess = fork(backendPath, [], {
     stdio: "pipe",
+    env: { ...process.env },
   });
 
   backendProcess.stdout.on("data", (data) => {
-    console.log(`[Backend STDOUT]: ${data.toString().trim()}`);
+    const output = data.toString().trim();
+    console.log(`[Backend STDOUT]: ${output}`);
+
+    // Look for port information in the output
+    if (output.includes("[PORT INFO]")) {
+      const portMatch = output.match(/API Port: (\d+), Transfer Port: (\d+)/);
+      if (portMatch && portMatch.length >= 3) {
+        const apiPort = portMatch[1];
+        const transferPort = portMatch[2];
+
+        // Set environment variables for the frontend
+        process.env.VITE_API_PORT = apiPort;
+        process.env.VITE_TRANSFER_PORT = transferPort;
+
+        console.log(
+          `[Main Process] Detected ports - API: ${apiPort}, Transfer: ${transferPort}`
+        );
+      }
+    }
   });
 
   backendProcess.stderr.on("data", (data) => {
