@@ -149,13 +149,29 @@ root/
 
 ## Data Flow Diagram
 
-The application follows this data flow for file transfers:
-
-1. **Sender Frontend** → **Sender Backend**: User selects files and target devices
-2. **Sender Backend** → **Receiver Backend**: Files are transferred over the network
-3. **Receiver Backend** → **Receiver Frontend**: Notification of incoming files
-4. **Receiver Frontend** → **Receiver Backend**: User accepts or rejects the transfer
-5. **Receiver Backend** → **Receiver Frontend**: Files are downloaded and saved
+```
++----------------+                                  +------------------+
+|                |                                  |                  |
+|  Sender        |                                  |  Receiver        |
+|  +----------+  |                                  |  +------------+  |
+|  | Frontend |--|--(1) Select files & devices---->|  |  Backend   |  |
+|  +----------+  |                                  |  +------------+  |
+|       |        |                                  |       |          |
+|       v        |                                  |       v          |
+|  +----------+  |                                  |  +------------+  |
+|  | Backend  |--|--(2) Transfer files------------>|  | Frontend   |  |
+|  +----------+  |                                  |  +------------+  |
+|                |                                  |       |          |
++----------------+                                  |       v          |
+                                                    |  (3) Accept/    |
+                                                    |      Reject     |
+                                                    |       |          |
+                                                    |       v          |
+                                                    |  (4) Download   |
+                                                    |      Files      |
+                                                    |                  |
+                                                    +------------------+
+```
 
 ## License
 
