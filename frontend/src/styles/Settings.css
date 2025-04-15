@@ -220,65 +220,92 @@ input:checked + .slider:before {
 
 /* Select Dropdown */
 .setting-select {
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
   border-radius: 10px;
   min-width: 150px;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23888888' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 body.dark-theme .setting-select {
   background-color: rgba(30, 30, 30, 0.5);
   border: 1px solid var(--glass-border);
   color: var(--text-light);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 body.light-theme .setting-select {
   background-color: rgba(255, 255, 255, 0.7);
   border: 1px solid rgba(0, 0, 0, 0.05);
   color: #333333;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  background-image: url("data:image/svg+xml;utf8,<svg fill='%23333333' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
 }
 
 body.dark-theme .setting-select:focus {
   outline: none;
   border-color: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1), 0 4px 15px rgba(0, 0, 0, 0.2);
+  transform: translateY(-2px);
 }
 
 body.light-theme .setting-select:focus {
   outline: none;
   border-color: rgba(0, 123, 255, 0.3);
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1), 0 4px 15px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
 
 body.dark-theme .setting-select option {
   background-color: #1E1E1E;
   color: var(--text-light);
+  padding: 10px;
 }
 
 body.light-theme .setting-select option {
   background-color: white;
   color: #333333;
+  padding: 10px;
+}
+
+body.dark-theme .setting-select:hover {
+  background-color: rgba(40, 40, 40, 0.6);
+  transform: translateY(-2px);
+}
+
+body.light-theme .setting-select:hover {
+  background-color: rgba(245, 245, 245, 0.8);
+  transform: translateY(-2px);
 }
 
 .memory-management-buttons {
-  display: contents;
-  flex-direction: column;
-  gap: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
   width: 100%;
+  margin-top: 1rem;
 }
 
 .danger-button {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  padding: 0.5rem 0.5rem;
-  margin-inline: 10pt;
+  padding: 0.75rem 1rem;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
+  flex: 1;
 }
 
 body.dark-theme .danger-button {

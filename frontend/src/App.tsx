@@ -10,11 +10,12 @@ import useReceiving from "./hooks/useReceiving";
 import "./styles/App.css";
 import "./styles/markdown.css";
 import "./styles/shared.css";
+import "./styles/Modal.css";
 
 /**
  * Root component of the application.
  * Manages the application's main layout, theme, and websocket connection.
- * 
+ *
  * Features:
  * - Persists active tab and receiving state in localStorage
  * - Manages WebSocket connection for file transfer functionality
@@ -29,26 +30,38 @@ function App() {
   >([]);
   const [showIncomingModal, setShowIncomingModal] = useState(false);
 
-  const handleAccept = (file: { fileName: string; fileSize: number; downloadUrl: string }) => {
-    const link = document.createElement('a');
+  const handleAccept = (file: {
+    fileName: string;
+    fileSize: number;
+    downloadUrl: string;
+  }) => {
+    const link = document.createElement("a");
     link.href = file.downloadUrl;
     link.download = file.fileName;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 
-    setIncomingFiles((prev) => prev.filter((f) => f.downloadUrl !== file.downloadUrl));
+    setIncomingFiles((prev) =>
+      prev.filter((f) => f.downloadUrl !== file.downloadUrl)
+    );
     if (incomingFiles.length === 1) setShowIncomingModal(false);
   };
 
-  const handleReject = (file: { fileName: string; fileSize: number; downloadUrl: string }) => {
-    setIncomingFiles((prev) => prev.filter((f) => f.downloadUrl !== file.downloadUrl));
+  const handleReject = (file: {
+    fileName: string;
+    fileSize: number;
+    downloadUrl: string;
+  }) => {
+    setIncomingFiles((prev) =>
+      prev.filter((f) => f.downloadUrl !== file.downloadUrl)
+    );
     if (incomingFiles.length === 1) setShowIncomingModal(false);
   };
 
   const handleAcceptAll = () => {
     incomingFiles.forEach((file) => {
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = file.downloadUrl;
       link.download = file.fileName;
       document.body.appendChild(link);
@@ -76,11 +89,16 @@ function App() {
   // Establish WebSocket connection on mount
   useEffect(() => {
     websocketService.setOnFileAvailable((file) => {
-      setIncomingFiles((prev) => [...prev, {
-        fileName: file.fileName,
-        fileSize: file.fileSize,
-        downloadUrl: `${import.meta.env.VITE_API_BASE_URL || ""}${file.downloadUrl}`
-      }]);
+      setIncomingFiles((prev) => [
+        ...prev,
+        {
+          fileName: file.fileName,
+          fileSize: file.fileSize,
+          downloadUrl: `${import.meta.env.VITE_API_BASE_URL || ""}${
+            file.downloadUrl
+          }`,
+        },
+      ]);
       setShowIncomingModal(true);
     });
 
@@ -93,7 +111,6 @@ function App() {
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);
-
 
   return (
     <ThemeProvider>

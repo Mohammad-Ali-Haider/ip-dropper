@@ -7,6 +7,14 @@ interface Props {
   children: React.ReactNode;
   centered?: boolean;
   className?: string;
+  size?: "sm" | "lg" | "xl";
+  fullscreen?:
+    | boolean
+    | "sm-down"
+    | "md-down"
+    | "lg-down"
+    | "xl-down"
+    | "xxl-down";
 }
 
 function BaseModal({
@@ -16,6 +24,8 @@ function BaseModal({
   children,
   centered = true,
   className = "",
+  size = "lg",
+  fullscreen = false,
 }: Props) {
   return (
     <Modal
@@ -23,7 +33,9 @@ function BaseModal({
       onHide={onHide}
       centered={centered}
       dialogClassName={className}
-      size="lg"
+      size={size}
+      fullscreen={fullscreen}
+      backdropClassName="modal-backdrop"
     >
       <Modal.Header closeButton>
         <Modal.Title>{title}</Modal.Title>

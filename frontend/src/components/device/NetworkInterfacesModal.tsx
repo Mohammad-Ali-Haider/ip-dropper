@@ -41,6 +41,7 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
       onHide={onHide}
       title="Network Interfaces"
       className="network-interfaces-modal"
+      size="xl"
     >
       <div className="network-interfaces-list">
         {sortedInterfaces.length === 0 ? (

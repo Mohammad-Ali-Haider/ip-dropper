@@ -11,7 +11,7 @@ IP Dropper is a cross-platform desktop application that allows seamless file tra
 - **Device Management:** Add, edit, and remove devices with custom details
 - **Real-time Status:** View device connection status and transfer progress
 - **Cross-Platform:** Runs as a desktop app via Electron on Windows, macOS, and Linux
-- **Modern UI:** Built with React, TypeScript, and Vite for a fast, responsive interface
+- **Modern UI:** Built with React, TypeScript, and Vite for a fast, responsive interface with a glassy, modern design
 - **Automatic Port Selection:** Automatically finds available ports if default ports are in use
 - **History Tracking:** Keep track of all file transfers with detailed logs
 
@@ -46,7 +46,7 @@ IP Dropper is a cross-platform desktop application that allows seamless file tra
 - **Frontend:** React 19, TypeScript, Vite 6, Bootstrap 5
 - **Backend:** Node.js, Express.js, WebSockets (ws)
 - **Desktop:** Electron
-- **Styling:** Bootstrap, CSS Modules
+- **Styling:** Bootstrap, CSS Modules, Custom Glassy UI Components
 - **Package Management:** npm with Workspaces
 - **Version Control:** Git
 
@@ -98,16 +98,6 @@ Or to run the web version only (without Electron):
 npm run dev:web
 ```
 
-### 4. Building for Production
-
-To build the application for distribution:
-
-```bash
-npm run build
-```
-
-This will create distributable packages in the `dist` directory for your platform.
-
 ## Project Structure
 
 ```
@@ -142,10 +132,20 @@ root/
 2. **Enable receiving mode** using the toggle in the sidebar to accept incoming files
 3. **Add devices** manually with their IP addresses or use automatic discovery
 4. **Select files** to send by dragging and dropping or using the file picker
-5. **Choose target devices** from your device list
+5. **Choose target devices** from your device list (supports up to 3 devices per row)
 6. **Send files** to the selected devices
 7. **Accept incoming transfers** on the receiving device when prompted
 8. **View transfer history** in the History tab
+
+## UI Features
+
+- **Glassy Modern Design:** Translucent UI elements with subtle blur effects
+- **Dark/Light Theme:** Fully customized themes with smooth transitions
+- **Responsive Layout:** Adapts to different screen sizes and orientations
+- **Modal Backdrop Blur:** Background blur effect when modals are open
+- **Grid Layouts:** Optimized device and network interface displays
+- **Animated Interactions:** Smooth animations for better user experience
+- **Consistent Styling:** Unified design language across all components
 
 ## Data Flow Diagram
 
@@ -167,16 +167,6 @@ flowchart LR
     RFE -->|4. Accept/reject transfer| RBE
     RBE -->|5. Download files| RFE
 ```
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 
