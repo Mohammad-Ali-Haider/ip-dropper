@@ -12,8 +12,10 @@
   align-items: center;
   justify-content: center;
   height: 100%;
+  max-height: 100%;
   color: var(--text-light);
   opacity: 0.6;
+  overflow: hidden;
 }
 
 .received-empty i {
@@ -39,8 +41,12 @@
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem;
-  border-radius: 4px;
-  background-color: var(--card-hover-bg);
+  border-radius: 8px;
+  background-color: var(--card-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
 }
 
 .file-info {
@@ -61,12 +67,18 @@
   color: var(--text-light);
   text-decoration: none;
   padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: all 0.2s ease;
+  border-radius: 6px;
+  transition: all 0.3s ease;
 }
 
-.download-link:hover {
+body.dark-theme .download-link:hover {
   color: var(--device-online);
+  background-color: rgba(81, 207, 102, 0.1);
+}
+
+body.light-theme .download-link:hover {
+  color: var(--device-online);
+  background-color: rgba(81, 207, 102, 0.05);
 }
 
 .item-right {
@@ -78,15 +90,21 @@
 .info-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--text-light);
   padding: 0.25rem;
   cursor: pointer;
   opacity: 0.6;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
+  border-radius: 4px;
 }
 
-.info-btn:hover {
-  color: var(--primary-color);
+body.dark-theme .info-btn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  opacity: 1;
+}
+
+body.light-theme .info-btn:hover {
+  background-color: rgba(0, 0, 0, 0.05);
   opacity: 1;
 }
 

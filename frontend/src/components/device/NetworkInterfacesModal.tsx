@@ -24,7 +24,7 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
       setCopiedAddress(address);
       setTimeout(() => setCopiedAddress(null), 2000);
     } catch (err) {
-      console.error('Failed to copy address:', err);
+      console.error("Failed to copy address:", err);
     }
   };
 
@@ -36,7 +36,12 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
   });
 
   return (
-    <BaseModal show={show} onHide={onHide} title="Network Interfaces">
+    <BaseModal
+      show={show}
+      onHide={onHide}
+      title="Network Interfaces"
+      className="network-interfaces-modal"
+    >
       <div className="network-interfaces-list">
         {sortedInterfaces.length === 0 ? (
           <div className="no-interfaces">
@@ -44,9 +49,9 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
           </div>
         ) : (
           sortedInterfaces.map((iface, index) => (
-            <div 
-              key={index} 
-              className={`interface-item ${iface.isInternal ? 'internal' : ''}`}
+            <div
+              key={index}
+              className={`interface-item ${iface.isInternal ? "internal" : ""}`}
             >
               <div className="interface-header">
                 <h6 className="interface-name">
@@ -56,11 +61,13 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
                   )}
                 </h6>
               </div>
-              
+
               <div className="interface-addresses">
                 {iface.ipv4 && (
-                  <div 
-                    className={`interface-address ${copiedAddress === iface.ipv4 ? 'copied' : ''}`}
+                  <div
+                    className={`interface-address ${
+                      copiedAddress === iface.ipv4 ? "copied" : ""
+                    }`}
                     onClick={() => handleCopyAddress(iface.ipv4!)}
                   >
                     <div className="address-content">
@@ -75,10 +82,12 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
                     </div>
                   </div>
                 )}
-                
+
                 {iface.ipv6 && (
-                  <div 
-                    className={`interface-address ${copiedAddress === iface.ipv6 ? 'copied' : ''}`}
+                  <div
+                    className={`interface-address ${
+                      copiedAddress === iface.ipv6 ? "copied" : ""
+                    }`}
                     onClick={() => handleCopyAddress(iface.ipv6!)}
                   >
                     <div className="address-content">
@@ -103,4 +112,3 @@ function NetworkInterfacesModal({ show, onHide, interfaces }: Props) {
 }
 
 export default NetworkInterfacesModal;
-

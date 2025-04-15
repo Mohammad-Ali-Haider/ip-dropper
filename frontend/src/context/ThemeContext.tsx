@@ -1,6 +1,12 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 
-type Theme = 'dark' | 'light' | 'system';
+type Theme = "dark" | "light" | "system";
 
 interface ThemeContextType {
   theme: Theme;
@@ -10,51 +16,74 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 const getInitialTheme = (): Theme => {
-  if (typeof window === 'undefined') return 'dark';
+  if (typeof window === "undefined") return "dark";
 
-  const stored = localStorage.getItem('theme') as Theme;
+  const stored = localStorage.getItem("theme") as Theme;
   if (stored) {
     applyTheme(stored);
     return stored;
   }
-  
+
   // Device or Browser in dark theme or no
-  const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  applyTheme(isDark ? 'dark' : 'light');
-  return isDark ? 'dark' : 'light';
+  const isDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+  applyTheme(isDark ? "dark" : "light");
+  return isDark ? "dark" : "light";
 };
 
 // Apply theme to document root
 const applyTheme = (theme: Theme) => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === "undefined") return;
 
   const root = document.documentElement;
+  const body = document.body;
   let effectiveTheme = theme;
 
-  if (theme === 'system') {
-    effectiveTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (theme === "system") {
+    effectiveTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? "dark"
+      : "light";
   }
+
+  // Remove existing theme classes
+  body.classList.remove("dark-theme", "light-theme");
+  // Add the current theme class
+  body.classList.add(`${effectiveTheme}-theme`);
 
   const themeColors = {
     dark: {
-      '--bg-dark': '#121212',
-      '--sidebar-bg': '#1E1E1E',
-      '--card-bg': '#2E2E2E',
-      '--accent': '#3A3A3A',
-      '--text-light': '#E0E0E0',
-      '--border-color': '#444444',
+      "--bg-dark": "#121212",
+      "--sidebar-bg": "rgba(30, 30, 30, 0.6)",
+      "--sidebar-glass": "rgba(30, 30, 30, 0.4)",
+      "--sidebar-border": "rgba(255, 255, 255, 0.1)",
+      "--card-bg": "rgba(46, 46, 46, 0.7)",
+      "--card-bg-solid": "#2E2E2E",
+      "--accent": "rgba(58, 58, 58, 0.8)",
+      "--accent-hover": "rgba(70, 70, 70, 0.8)",
+      "--text-light": "#E0E0E0",
+      "--border-color": "rgba(68, 68, 68, 0.5)",
+      "--glass-border": "rgba(255, 255, 255, 0.1)",
+      "--glass-shadow": "0 8px 32px rgba(0, 0, 0, 0.3)",
+      "--glass-glow": "0 0 15px rgba(255, 255, 255, 0.05)",
     },
     light: {
-      '--bg-dark': '#ffffff',
-      '--sidebar-bg': '#f8f9fa',
-      '--card-bg': '#ffffff',
-      '--accent': '#e9ecef',
-      '--text-light': '#212529',
-      '--border-color': '#dee2e6',
-    }
+      "--bg-dark": "#ffffff",
+      "--sidebar-bg": "rgba(255, 255, 255, 0.7)",
+      "--sidebar-glass": "rgba(255, 255, 255, 0.6)",
+      "--sidebar-border": "rgba(0, 0, 0, 0.05)",
+      "--card-bg": "rgba(255, 255, 255, 0.8)",
+      "--card-bg-solid": "#ffffff",
+      "--accent": "rgba(240, 240, 240, 0.8)",
+      "--accent-hover": "rgba(230, 230, 230, 0.8)",
+      "--text-light": "#333333",
+      "--border-color": "rgba(200, 200, 200, 0.5)",
+      "--glass-border": "rgba(0, 0, 0, 0.05)",
+      "--glass-shadow": "0 8px 32px rgba(0, 0, 0, 0.05)",
+      "--glass-glow": "0 0 15px rgba(0, 0, 0, 0.02)",
+    },
   };
 
-  const colors = effectiveTheme === 'dark' ? themeColors.dark : themeColors.light;
+  const colors =
+    effectiveTheme === "dark" ? themeColors.dark : themeColors.light;
   Object.entries(colors).forEach(([property, value]) => {
     root.style.setProperty(property, value);
   });
@@ -67,13 +96,13 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     applyTheme(theme);
-    localStorage.setItem('theme', theme);
+    localStorage.setItem("theme", theme);
 
-    if (theme === 'system') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
       const handler = () => applyTheme(theme);
-      mediaQuery.addEventListener('change', handler);
-      return () => mediaQuery.removeEventListener('change', handler);
+      mediaQuery.addEventListener("change", handler);
+      return () => mediaQuery.removeEventListener("change", handler);
     }
   }, [theme]);
 
@@ -87,7 +116,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
-    throw new Error('useTheme must be used within a ThemeProvider');
+    throw new Error("useTheme must be used within a ThemeProvider");
   }
   return context;
 }

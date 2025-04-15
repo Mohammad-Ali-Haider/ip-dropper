@@ -1,6 +1,19 @@
 .device-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
   padding: 1rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+  .device-list {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .device-list {
+    grid-template-columns: 1fr;
+  }
 }

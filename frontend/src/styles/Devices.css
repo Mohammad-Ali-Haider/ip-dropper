@@ -19,16 +19,19 @@
   overflow-y: auto;
   padding-right: 0.5rem; /* Add space for scrollbar */
   margin-bottom: 0.5rem;
+  width: 100%;
 }
 
 .files-sidebar {
   width: 300px;
   background-color: var(--card-bg);
-  border-left: 1px solid var(--border-color);
+  border-left: 1px solid var(--glass-border);
   padding: 1rem;
   display: flex;
   flex-direction: column;
   height: 100%;
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
 }
 
 .files-content {
@@ -59,11 +62,18 @@
   border-color: var(--drag-accent);
 }
 
-.upload-area.dragging-over {
+body.dark-theme .upload-area.dragging-over {
   transform: scale(1.02);
   box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.4);
   border: 2px dashed var(--drag-accent);
   background-color: rgba(var(--drag-accent-rgb), 0.1);
+}
+
+body.light-theme .upload-area.dragging-over {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.2);
+  border: 2px dashed var(--drag-accent);
+  background-color: rgba(var(--drag-accent-rgb), 0.05);
 }
 
 .upload-area::after {
@@ -96,11 +106,13 @@
   background-color: var(--accent);
   color: var(--text-light);
   border: none;
-  border-radius: 6px;
+  border-radius: 10px;
   font-weight: 600;
   margin-top: 0.5rem;
   transition: all 0.3s ease;
   cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
 .send-button:disabled {
@@ -109,9 +121,16 @@
   background-color: var(--border-color);
 }
 
-.send-button:not(:disabled):hover {
+body.dark-theme .send-button:not(:disabled):hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background-color: var(--accent-hover);
+}
+
+body.light-theme .send-button:not(:disabled):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: var(--accent-hover);
 }
 
 .send-button:not(:disabled):active {
@@ -123,7 +142,7 @@
   margin-top: auto;
   padding: 0.75rem 0.75rem 0; /* Remove bottom padding */
   background-color: var(--card-bg);
-  border-top: 1px solid var(--border-color);
+  border-top: 1px solid var(--glass-border);
   width: 100%;
 }
 
@@ -141,14 +160,23 @@
   color: var(--text-light);
   border: none;
   padding: 0.8rem 1.5rem;
-  border-radius: 6px;
+  border-radius: 10px;
   font-weight: 600;
   transition: all 0.3s ease;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
 }
 
-.add-device-btn:hover {
+body.dark-theme .add-device-btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  background-color: var(--accent-hover);
+}
+
+body.light-theme .add-device-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  background-color: var(--accent-hover);
 }
 
 /* File upload related styles */
@@ -185,9 +213,11 @@
   align-items: center;
   gap: 0.5rem;
   padding: 0.4rem;
-  background-color: var(--sidebar-bg);
-  border-radius: 4px;
+  background-color: var(--sidebar-glass);
+  border-radius: 8px;
   margin-bottom: 0.3rem;
+  border: 1px solid var(--glass-border);
+  transition: all 0.3s ease;
 }
 
 .file-icon {

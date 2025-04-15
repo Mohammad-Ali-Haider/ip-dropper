@@ -4,13 +4,16 @@
   gap: 1rem;
   padding: 1rem;
   margin: 0.5rem 0;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
   background-color: var(--card-bg);
   color: var(--text-light);
   position: relative;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.3s ease-in-out;
   cursor: pointer;
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .device-card.online {
@@ -23,33 +26,43 @@
 }
 
 /* Base hover state for online devices */
-.device-card:hover:not(.offline):not(.selected) {
+body.dark-theme .device-card:hover:not(.offline):not(.selected) {
   transform: scale(1.02);
-  border-color: var(--drag-accent);
-  background-color: rgba(var(--drag-accent-rgb), 0.1);
-  box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.4);
+  border-color: rgba(0, 123, 255, 0.5);
+  background-color: rgba(0, 123, 255, 0.15);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+}
+
+body.light-theme .device-card:hover:not(.offline):not(.selected) {
+  transform: scale(1.02);
+  border-color: rgba(0, 123, 255, 0.3);
+  background-color: rgba(0, 123, 255, 0.05);
+  box-shadow: 0 8px 25px rgba(0, 123, 255, 0.1);
 }
 
 /* Selected state */
 .device-card.selected {
-  background-color: rgba(81, 207, 102, 0.1);
-  border-color: var(--device-online);
+  background-color: rgba(81, 207, 102, 0.15);
+  border-color: rgba(81, 207, 102, 0.5);
+  box-shadow: 0 4px 15px rgba(81, 207, 102, 0.2);
 }
 
 /* Hover state when selected */
 .device-card.selected:hover:not(.offline) {
   transform: scale(1.02);
-  background-color: rgba(81, 207, 102, 0.15);
-  border-color: var(--device-online);
-  box-shadow: 0 0 20px rgba(81, 207, 102, 0.4);
+  background-color: rgba(81, 207, 102, 0.2);
+  border-color: rgba(81, 207, 102, 0.6);
+  box-shadow: 0 8px 25px rgba(81, 207, 102, 0.3);
 }
 
 /* Dragging states */
 .device-card.dragging-over {
   transform: scale(1.02);
-  box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.4);
-  border: 2px dashed var(--drag-accent);
-  background-color: rgba(var(--drag-accent-rgb), 0.1);
+  box-shadow: 0 8px 30px rgba(0, 123, 255, 0.4);
+  border: 2px dashed rgba(0, 123, 255, 0.7);
+  background-color: rgba(0, 123, 255, 0.15);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 
 .device-card.selected.dragging-over {
