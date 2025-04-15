@@ -10,7 +10,7 @@ IP Dropper is a cross-platform desktop application that allows seamless file tra
 - **File Transfer:** Send and receive files between devices easily
 - **Device Management:** Add, edit, and remove devices with custom details
 - **Real-time Status:** View device connection status and transfer progress
-- **Cross-Platform:** Runs as a desktop app via Electron on Windows, macOS, and Linux
+- **Cross-Platform:** Runs on Windows, macOS, and Linux
 - **Modern UI:** Built with React, TypeScript, and Vite for a fast, responsive interface with a glassy, modern design
 - **Automatic Port Selection:** Automatically finds available ports if default ports are in use
 - **History Tracking:** Keep track of all file transfers with detailed logs
