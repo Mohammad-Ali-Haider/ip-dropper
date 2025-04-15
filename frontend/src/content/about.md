@@ -5,7 +5,7 @@ IP Dropper is an open-source project developed to enable seamless file transfer 
 ## Version Information
 
 - Current Version: 1.0.0
-- Release Date: 2024
+- Release Date: 2025
 - License: MIT
 
 ## Technologies
