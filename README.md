@@ -2,64 +2,68 @@
 
 IP Dropper is a cross-platform desktop application that allows seamless file transfer and device management over a local network. It combines a **React** frontend, a **Node.js/Express** backend, and an **Electron** wrapper to provide a smooth user experience on the desktop.
 
----
+![IP Dropper](frontend/public/logo.png)
 
 ## Features
 
-- **Device Discovery:** Detect devices connected to the same network.
-- **File Transfer:** Send and receive files between devices easily.
-- **Device Management:** Add, edit, and remove devices with custom details.
-- **Real-time Status:** View device connection status and transfer progress.
-- **Cross-Platform:** Runs as a desktop app via Electron.
-- **Modern UI:** Built with React, TypeScript, and Vite for fast, responsive interface.
-
----
+- **Device Discovery:** Detect devices connected to the same network
+- **File Transfer:** Send and receive files between devices easily
+- **Device Management:** Add, edit, and remove devices with custom details
+- **Real-time Status:** View device connection status and transfer progress
+- **Cross-Platform:** Runs as a desktop app via Electron on Windows, macOS, and Linux
+- **Modern UI:** Built with React, TypeScript, and Vite for a fast, responsive interface
+- **Automatic Port Selection:** Automatically finds available ports if default ports are in use
+- **History Tracking:** Keep track of all file transfers with detailed logs
 
 ## Architecture Overview
 
 ### Frontend (React + Vite)
+
 - Located in `/frontend`
-- Built with **React** and **TypeScript**
-- Uses **Vite** for fast development and build
+- Built with **React 19** and **TypeScript**
+- Uses **Vite 6** for fast development and build
+- Styled with **Bootstrap 5** and CSS Modules
 - Provides UI components for device list, file upload, modals, and more
-- Communicates with backend via REST APIs and WebSockets (if applicable)
+- Communicates with backend via REST APIs and WebSockets
 
 ### Backend (Node.js + Express)
+
 - Located in `/backend`
 - REST API server built with **Express.js**
+- WebSocket server for real-time communication
 - Handles device management, file transfer endpoints, and network operations
 - Contains controllers, routes, services, and utility modules
 
 ### Electron
+
 - Located in `/electron`
 - Wraps the frontend and backend into a single desktop application
 - Manages the app lifecycle and native OS integration
-
----
+- Provides cross-platform compatibility
 
 ## Technologies Used
 
-- **Frontend:** React, TypeScript, Vite
-- **Backend:** Node.js, Express.js
+- **Frontend:** React 19, TypeScript, Vite 6, Bootstrap 5
+- **Backend:** Node.js, Express.js, WebSockets (ws)
 - **Desktop:** Electron
-- **Styling:** CSS Modules
-- **Package Management:** npm
+- **Styling:** Bootstrap, CSS Modules
+- **Package Management:** npm with Workspaces
 - **Version Control:** Git
-
----
 
 ## Prerequisites
 
-- [Node.js](https://nodejs.org/) (v16 or higher recommended)
+- [Node.js](https://nodejs.org/) (v18.18.0 or higher recommended)
 - npm (comes with Node.js)
 
----
+## Port Usage
 
-## Important: Port Usage
+The application dynamically selects available ports for both the frontend and backend services:
 
-Make sure that **ports 3000 and 3001** on your machine are free and not occupied by other applications. The frontend development server runs on port **3000**, and the backend server runs on port **3001** by default. If these ports are in use, the application may fail to start properly.
+- **Frontend (Vite):** Default port 5173, automatically selects next available port if occupied
+- **Backend API:** Default port 3000, automatically selects next available port if occupied
+- **File Transfer Service:** Default port 3001, automatically selects next available port if occupied
 
----
+You don't need to manually configure ports - the application will automatically find available ports if the defaults are in use.
 
 ## Getting Started
 
@@ -78,7 +82,7 @@ At the root of the project, run:
 npm install
 ```
 
-This installs all necessary dependencies for the frontend, backend, and Electron app.
+This installs all necessary dependencies for the frontend, backend, and Electron app using npm workspaces.
 
 ### 3. Run the Application
 
@@ -88,15 +92,21 @@ To start the Electron app with both frontend and backend:
 npm run dev
 ```
 
-or to run the web version only:
+Or to run the web version only (without Electron):
 
 ```bash
 npm run dev:web
 ```
 
-This will launch the desktop or web application accordingly.
+### 4. Building for Production
 
----
+To build the application for distribution:
+
+```bash
+npm run build
+```
+
+This will create distributable packages in the `dist` directory for your platform.
 
 ## Project Structure
 
@@ -104,35 +114,38 @@ This will launch the desktop or web application accordingly.
 root/
 ├── backend/          # Node.js backend server
 │   ├── src/
-│   │   ├── controllers/
-│   │   ├── routes/
-│   │   ├── services/
-│   │   └── utils/
+│   │   ├── controllers/  # API endpoint handlers
+│   │   ├── routes/       # API route definitions
+│   │   ├── services/     # Business logic services
+│   │   └── utils/        # Utility functions
 │   └── package.json
 ├── frontend/         # React frontend app
 │   ├── src/
-│   ├── public/
+│   │   ├── components/   # Reusable UI components
+│   │   ├── context/      # React context providers
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── services/     # API client services
+│   │   ├── styles/       # CSS and style files
+│   │   ├── tabs/         # Main application tabs
+│   │   └── types/        # TypeScript type definitions
+│   ├── public/           # Static assets
 │   └── package.json
 ├── electron/         # Electron main process code
-│   └── main.js
+│   └── main.js           # Electron entry point
 ├── package.json      # Root package.json with scripts and dependencies
 └── README.md         # This file
 ```
 
----
-
 ## Usage
 
-- Launch the app and ensure devices are connected to the same local network.
-- Add devices manually or discover automatically (if supported).
-- Select files to send to a device.
-- Accept incoming file transfers on the receiving device.
-
----
-
-## License
-
-This project is licensed under the MIT License.
+1. **Launch the app** and ensure devices are connected to the same local network
+2. **Enable receiving mode** using the toggle in the sidebar to accept incoming files
+3. **Add devices** manually with their IP addresses or use automatic discovery
+4. **Select files** to send by dragging and dropping or using the file picker
+5. **Choose target devices** from your device list
+6. **Send files** to the selected devices
+7. **Accept incoming transfers** on the receiving device when prompted
+8. **View transfer history** in the History tab
 
 ## Data Flow Diagram
 
@@ -143,12 +156,32 @@ flowchart LR
       BE[Sender Backend]
     end
 
-    subgraph Reciever
-      RFE[Reciever Frontend]
-      RBE[Reciever Backend]
+    subgraph Receiver
+      RFE[Receiver Frontend]
+      RBE[Receiver Backend]
     end
 
-    FE --> BE
-    BE --> RBE
-    RBE --> RFE
+    FE -->|1. Select files & devices| BE
+    BE -->|2. Transfer files| RBE
+    RBE -->|3. Notify of incoming files| RFE
+    RFE -->|4. Accept/reject transfer| RBE
+    RBE -->|5. Download files| RFE
 ```
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Author
+
+- **Mohammad Ali Haider** - [GitHub](https://github.com/Mohammad-Ali-Haider)

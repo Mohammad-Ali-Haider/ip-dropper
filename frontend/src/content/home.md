@@ -1,17 +1,20 @@
 # Welcome to IP Dropper
 
-IP Dropper is a modern, cross-platform tool designed to simplify device management and IP address tracking across your network.
+IP Dropper is a cross-platform desktop application that allows seamless file transfer and device management over a local network. It combines a React frontend, a Node.js/Express backend, and an Electron wrapper to provide a smooth user experience on desktop.
 
 ## Features
 
-- **Device Management**: Easily add and manage network devices
-- **Real-time Status**: Monitor device connectivity status
-- **Cross-platform Support**: Works on Windows, macOS, and Linux
-- **Secure Communication**: End-to-end encrypted data transfer
-- **History Tracking**: Keep track of all connections and transfers
+- **Device Discovery**: Detect devices connected to the same network
+- **File Transfer**: Send and receive files between devices easily
+- **Device Management**: Add, edit, and remove devices with custom details
+- **Real-time Status**: View device connection status and transfer progress
+- **Cross-platform**: Works on Windows, macOS, and Linux via Electron
+- **Modern UI**: Built with React and TypeScript for a responsive interface
 
 ## Getting Started
 
-1. Add your devices using the "Devices" tab
-2. Enable receiving mode using the button in the sidebar
-3. Start monitoring your network!
+1. Ensure all devices are connected to the same local network
+2. Add devices manually or discover them automatically
+3. Select files to send to a device
+4. Accept incoming file transfers on the receiving device
+5. Monitor transfer progress in real-time

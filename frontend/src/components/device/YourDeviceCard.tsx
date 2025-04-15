@@ -18,10 +18,8 @@ function YourDeviceCard() {
   const [deviceType, setDeviceType] = useState<DeviceType | "loading">("loading");
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const refreshRate = useRefreshRate(); // Get refresh rate from hook
+  const refreshRate = useRefreshRate();
 
-  // Wrap fetchDeviceInfo in useCallback to prevent re-creation on every render
-  // Define it outside useEffect
   const fetchDeviceInfo = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/devices/current`, {
@@ -47,20 +45,16 @@ function YourDeviceCard() {
       setDeviceType(detectedType);
       setDeviceName(detectedName);
     }
-  }, []); // Empty dependency array as it doesn't depend on props or state outside its scope
+  }, []);
 
   useEffect(() => {
-
-    // Fetch immediately on mount
     fetchDeviceInfo();
 
-    // Set up interval based on refreshRate
     const intervalId = setInterval(fetchDeviceInfo, refreshRate);
 
-    // Clear interval on component unmount or when refreshRate changes
     return () => clearInterval(intervalId);
 
-  }, [fetchDeviceInfo, refreshRate]); // Re-run effect if fetchDeviceInfo or refreshRate changes
+  }, [fetchDeviceInfo, refreshRate]);
 
   return (
     <>

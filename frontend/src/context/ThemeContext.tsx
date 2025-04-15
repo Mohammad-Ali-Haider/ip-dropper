@@ -9,7 +9,6 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-// Get and apply initial theme immediately
 const getInitialTheme = (): Theme => {
   if (typeof window === 'undefined') return 'dark';
 
@@ -19,6 +18,7 @@ const getInitialTheme = (): Theme => {
     return stored;
   }
   
+  // Device or Browser in dark theme or no
   const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
   applyTheme(isDark ? 'dark' : 'light');
   return isDark ? 'dark' : 'light';
@@ -60,7 +60,6 @@ const applyTheme = (theme: Theme) => {
   });
 };
 
-// Execute immediately
 const initialTheme = getInitialTheme();
 
 export function ThemeProvider({ children }: { children: ReactNode }) {

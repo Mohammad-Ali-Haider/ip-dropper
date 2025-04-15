@@ -18,7 +18,6 @@ export function useDeviceSelection(onDeviceSelection: (devices: Device[]) => voi
     
     setSelectedDevices(newSelected);
 
-    // Convert Set of keys back to array of devices
     const selectedDevicesList = Array.from(newSelected)
       .map(key => {
         const [name, ip] = key.split('-');

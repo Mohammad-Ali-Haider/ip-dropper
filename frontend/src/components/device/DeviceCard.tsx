@@ -69,7 +69,6 @@ function DeviceCard({
   }, [ipaddress, refreshRate, name]);
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent selection when clicking action buttons
     if ((e.target as HTMLElement).closest(".device-actions")) {
       return;
     }
@@ -110,12 +109,10 @@ function DeviceCard({
       return;
     }
 
-    // Get all other devices (excluding the current one being edited)
     const otherDevices = existingDevices.filter(
       (device) => device.ipaddress !== ipaddress || device.name !== name
     );
 
-    // Check if IP address is already in use by another device
     if (otherDevices.some((device) => device.ipaddress === editIp)) {
       setError("IP address already exists");
       return;
