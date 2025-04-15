@@ -151,18 +151,16 @@ root/
 
 ```mermaid
 graph LR
-    %% Define nodes
-    FE[Sender Frontend]
-    BE[Sender Backend]
-    RBE[Receiver Backend]
-    RFE[Receiver Frontend]
+    FE[Sender Frontend: Select files & devices]
+    BE[Sender Backend: Transfer files]
+    RBE[Receiver Backend: Notify & Download]
+    RFE[Receiver Frontend: Accept/Reject Transfer]
 
-    %% Define flow
-    FE -->|1. Select files & devices| BE
-    BE -->|2. Transfer files| RBE
-    RBE -->|3. Notify of incoming files| RFE
-    RFE -->|4. Accept/reject transfer| RBE
-    RBE -->|5. Download files| RFE
+    FE --> BE
+    BE --> RBE
+    RBE --> RFE
+    RFE --> RBE
+    RBE --> RFE
 ```
 
 ## License
