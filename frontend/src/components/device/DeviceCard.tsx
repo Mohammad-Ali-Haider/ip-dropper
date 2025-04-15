@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, DragEvent } from "react";
 import { Device, DeviceStatus, DeviceType } from "../../types/device";
-import { getDeviceStatus, getDeviceType } from "../../services/deviceService";
+import { getDeviceStatus, getDeviceType, sendFiles } from "../../services/deviceService";
 import { useRefreshRate } from "../../hooks/useRefreshRate";
 import BaseModal from "../modals/BaseModal";
 import DeviceForm from "../forms/DeviceForm";
@@ -35,6 +35,7 @@ function DeviceCard({
   const [error, setError] = useState<string | null>(null);
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus>({ isOnline: false });
   const [deviceType, setDeviceType] = useState<DeviceType>("");
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
   const refreshRate = useRefreshRate();
 
   useEffect(() => {
@@ -142,14 +143,50 @@ function DeviceCard({
     setShowEditModal(false);
   };
 
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (deviceStatus.isOnline) {
+      setIsDraggingOver(true);
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+
+  const handleDragLeave = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+  };
+
+  const handleDrop = async (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDraggingOver(false);
+
+    if (!deviceStatus.isOnline) return;
+
+    const files = Array.from(e.dataTransfer.files);
+    if (files.length > 0) {
+      try {
+        await sendFiles(files, [{ name, ipaddress }]);
+      } catch (error) {
+        console.error("Failed to send files:", error);
+      }
+    }
+  };
+
   return (
     <>
       <div
         className={`device-card ${
           deviceStatus.isOnline ? "online" : "offline"
-        } ${isSelected ? "selected" : ""}`}
+        } ${isSelected ? "selected" : ""} ${isDraggingOver ? "dragging-over" : ""}`}
         onClick={handleCardClick}
-        title={!deviceStatus.isOnline ? "Cannot select offline devices" : ""}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        title={!deviceStatus.isOnline ? "Cannot send files to offline devices" : "Drag and drop files here to send"}
       >
         <div className="device-icon">
           <i

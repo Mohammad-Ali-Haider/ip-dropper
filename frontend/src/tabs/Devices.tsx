@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import DeviceList from "../components/device/DeviceList";
 import Button from "../components/common/Button";
 import AddDeviceModal from "../components/modals/AddDeviceModal";
@@ -7,6 +7,7 @@ import { useFileSelection } from "../hooks/useFileSelection";
 import { Device } from "../types/device";
 import { sendFiles } from "../services/deviceService";
 import "../styles/Devices.css";
+import { createFileTransferAnimation } from '../utils/animationUtils';
 
 function Devices() {
   const [devices, setDevices] = useState<Device[]>(() => {
@@ -18,6 +19,8 @@ function Devices() {
   const [selectedDevices, setSelectedDevices] = useState<Device[]>([]);
   const { selectedFiles, handleFileChange, handleRemoveFile, clearFiles } =
     useFileSelection();
+  const [isSending, setIsSending] = useState(false);
+  const uploadAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     localStorage.setItem("devices", JSON.stringify(devices));
@@ -61,12 +64,27 @@ function Devices() {
   };
 
   const handleSendFiles = async () => {
+    if (!uploadAreaRef.current) return;
+    
+    setIsSending(true);
+    
+    // Get all selected device elements
+    const selectedDeviceElements = document.querySelectorAll('.device-card.selected');
+    
+    // Trigger animation
+    createFileTransferAnimation(
+      uploadAreaRef.current,
+      Array.from(selectedDeviceElements) as HTMLElement[],
+      selectedFiles.length
+    );
+
     try {
       await sendFiles(selectedFiles, selectedDevices);
       clearFiles();
     } catch (error) {
       console.error("Failed to send files:", error);
-
+    } finally {
+      setIsSending(false);
     }
   };
 
@@ -97,18 +115,17 @@ function Devices() {
       <div className="files-sidebar">
         <div className="files-content">
           <UploadArea
+            ref={uploadAreaRef}
             selectedFiles={selectedFiles}
             onFileChange={handleFileChange}
             onRemoveFile={handleRemoveFile}
           />
           <button
-            className="send-button"
-            disabled={
-              selectedDevices.length === 0 || selectedFiles.length === 0
-            }
+            className={`send-button ${isSending ? 'sending' : ''}`}
+            disabled={selectedDevices.length === 0 || selectedFiles.length === 0 || isSending}
             onClick={handleSendFiles}
           >
-            Send Files
+            {isSending ? 'Sending...' : 'Send Files'}
             {selectedDevices.length > 0 &&
               ` (${selectedDevices.length} devices selected)`}
           </button>

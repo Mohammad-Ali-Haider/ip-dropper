@@ -9,7 +9,11 @@
   background-color: var(--card-bg);
   color: var(--text-light);
   position: relative;
-  transition: all 0.2s ease;
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+}
+
+.device-card.online {
   cursor: pointer;
 }
 
@@ -18,14 +22,71 @@
   cursor: not-allowed;
 }
 
+/* Base hover state for online devices */
+.device-card:hover:not(.offline):not(.selected) {
+  transform: scale(1.02);
+  border-color: var(--drag-accent);
+  background-color: rgba(var(--drag-accent-rgb), 0.1);
+  box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.4);
+}
+
+/* Selected state */
 .device-card.selected {
   background-color: rgba(81, 207, 102, 0.1);
   border-color: var(--device-online);
 }
 
-.device-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+/* Hover state when selected */
+.device-card.selected:hover:not(.offline) {
+  transform: scale(1.02);
+  background-color: rgba(81, 207, 102, 0.15);
+  border-color: var(--device-online);
+  box-shadow: 0 0 20px rgba(81, 207, 102, 0.4);
+}
+
+/* Dragging states */
+.device-card.dragging-over {
+  transform: scale(1.02);
+  box-shadow: 0 0 20px rgba(var(--drag-accent-rgb), 0.4);
+  border: 2px dashed var(--drag-accent);
+  background-color: rgba(var(--drag-accent-rgb), 0.1);
+}
+
+.device-card.selected.dragging-over {
+  box-shadow: 0 0 20px rgba(81, 207, 102, 0.4);
+  border: 2px dashed var(--device-online);
+  background-color: rgba(81, 207, 102, 0.15);
+}
+
+.device-card.offline.dragging-over {
+  box-shadow: 0 0 20px rgba(var(--drag-error-rgb), 0.4);
+  border: 2px dashed var(--drag-error);
+  background-color: rgba(var(--drag-error-rgb), 0.1);
+}
+
+/* Drop indicator */
+.device-card.online::after {
+  content: "Drop files here";
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 0.7rem;
+  color: var(--text-light);
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.device-card.online:hover::after {
+  opacity: 0.7;
+}
+
+.device-card.dragging-over::after {
+  opacity: 1;
+  color: var(--drag-accent);
+}
+
+.device-card.selected.dragging-over::after {
+  color: var(--device-online);
 }
 
 .device-icon {

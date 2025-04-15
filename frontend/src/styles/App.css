@@ -5,9 +5,14 @@
   --accent: #3A3A3A;
   --text-light: #E0E0E0;
   --border-color: #444444;
-
+  
+  /* Add these new variables */
   --device-online: #51cf66;
   --device-offline: #ff6b6b;
+  --drag-accent: #007bff;
+  --drag-accent-rgb: 0, 123, 255;
+  --drag-error: #dc3545;
+  --drag-error-rgb: 220, 53, 69;
 }
 
 html, body, #root {
