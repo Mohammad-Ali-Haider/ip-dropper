@@ -149,28 +149,20 @@ root/
 
 ## Data Flow Diagram
 
-```
-+----------------+                                  +------------------+
-|                |                                  |                  |
-|  Sender        |                                  |  Receiver        |
-|  +----------+  |                                  |  +------------+  |
-|  | Frontend |--|--(1) Select files & devices---->|  |  Backend   |  |
-|  +----------+  |                                  |  +------------+  |
-|       |        |                                  |       |          |
-|       v        |                                  |       v          |
-|  +----------+  |                                  |  +------------+  |
-|  | Backend  |--|--(2) Transfer files------------>|  | Frontend   |  |
-|  +----------+  |                                  |  +------------+  |
-|                |                                  |       |          |
-+----------------+                                  |       v          |
-                                                    |  (3) Accept/    |
-                                                    |      Reject     |
-                                                    |       |          |
-                                                    |       v          |
-                                                    |  (4) Download   |
-                                                    |      Files      |
-                                                    |                  |
-                                                    +------------------+
+```mermaid
+graph LR
+    %% Define nodes
+    FE[Sender Frontend]
+    BE[Sender Backend]
+    RBE[Receiver Backend]
+    RFE[Receiver Frontend]
+
+    %% Define flow
+    FE -->|1. Select files & devices| BE
+    BE -->|2. Transfer files| RBE
+    RBE -->|3. Notify of incoming files| RFE
+    RFE -->|4. Accept/reject transfer| RBE
+    RBE -->|5. Download files| RFE
 ```
 
 ## License
