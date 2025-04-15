@@ -149,24 +149,13 @@ root/
 
 ## Data Flow Diagram
 
-```mermaid
-flowchart LR
-    subgraph Sender
-      FE[Sender Frontend]
-      BE[Sender Backend]
-    end
+The application follows this data flow for file transfers:
 
-    subgraph Receiver
-      RFE[Receiver Frontend]
-      RBE[Receiver Backend]
-    end
-
-    FE -->|1. Select files & devices| BE
-    BE -->|2. Transfer files| RBE
-    RBE -->|3. Notify of incoming files| RFE
-    RFE -->|4. Accept/reject transfer| RBE
-    RBE -->|5. Download files| RFE
-```
+1. **Sender Frontend** → **Sender Backend**: User selects files and target devices
+2. **Sender Backend** → **Receiver Backend**: Files are transferred over the network
+3. **Receiver Backend** → **Receiver Frontend**: Notification of incoming files
+4. **Receiver Frontend** → **Receiver Backend**: User accepts or rejects the transfer
+5. **Receiver Backend** → **Receiver Frontend**: Files are downloaded and saved
 
 ## License
 
