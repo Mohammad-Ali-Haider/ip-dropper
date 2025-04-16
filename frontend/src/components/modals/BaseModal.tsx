@@ -9,7 +9,7 @@ interface Props {
   className?: string;
   size?: "sm" | "lg" | "xl";
   fullscreen?:
-    | boolean
+    | true
     | "sm-down"
     | "md-down"
     | "lg-down"
@@ -25,7 +25,7 @@ function BaseModal({
   centered = true,
   className = "",
   size = "lg",
-  fullscreen = false,
+  fullscreen,
 }: Props) {
   return (
     <Modal
