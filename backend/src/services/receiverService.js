@@ -50,8 +50,23 @@ export function startReceiver(wss, app, port) {
     socket.on("data", (data) => {
       try {
         if (!fileMetadata) {
-          // Try to parse the metadata from the first chunk
-          const metadataStr = data.toString().split("\n")[0];
+          // Find the newline byte that separates metadata from file content
+          let newlineIndex = -1;
+          for (let i = 0; i < data.length; i++) {
+            if (data[i] === 0x0a) {
+              // 0x0A is the byte value for '\n'
+              newlineIndex = i;
+              break;
+            }
+          }
+
+          if (newlineIndex === -1) {
+            console.error("[DEBUG] No metadata delimiter found in first chunk");
+            return;
+          }
+
+          // Extract metadata string using the exact byte position of the newline
+          const metadataStr = data.slice(0, newlineIndex).toString();
           try {
             fileMetadata = JSON.parse(metadataStr);
             if (!fileMetadata || !fileMetadata.name) {
@@ -63,8 +78,8 @@ export function startReceiver(wss, app, port) {
             return;
           }
 
-          // Remove metadata from the first chunk
-          const remainingData = Buffer.from(data.slice(metadataStr.length + 1));
+          // Extract remaining binary data after the newline
+          const remainingData = data.slice(newlineIndex + 1);
           if (remainingData.length > 0) {
             dataChunks.push(remainingData);
           }
@@ -88,6 +103,12 @@ export function startReceiver(wss, app, port) {
         }
 
         const completeFileBuffer = Buffer.concat(dataChunks);
+        console.log(
+          `[DEBUG] File received: ${fileMetadata.name}, Size: ${
+            completeFileBuffer.length
+          } bytes, Type: ${fileMetadata.type || "unknown"}`
+        );
+
         const downloadId =
           Date.now().toString(36) + Math.random().toString(36).substr(2);
 
@@ -111,10 +132,20 @@ export function startReceiver(wss, app, port) {
 
             const { metadata, buffer } = downloadData;
 
-            // Serve inline to avoid forced download
+            // Determine if we should use 'attachment' or 'inline' based on file type
+            const isBinaryFile =
+              metadata.type &&
+              (metadata.type.startsWith("application/") ||
+                metadata.type.startsWith("image/") ||
+                metadata.type.startsWith("audio/") ||
+                metadata.type.startsWith("video/") ||
+                metadata.type === "application/octet-stream");
+
             res.setHeader(
               "Content-Disposition",
-              `inline; filename="${metadata.name}"`
+              `${isBinaryFile ? "attachment" : "inline"}; filename="${
+                metadata.name
+              }"`
             );
             res.setHeader(
               "Content-Type",
