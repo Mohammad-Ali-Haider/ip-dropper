@@ -8,15 +8,7 @@ import { startReceiver, stopReceiver } from "./services/receiverService.js";
 import { findAvailablePort, exportPorts } from "./utils/portUtils.js";
 
 // Create upload directory if it doesn't exist
-// Use app data directory in production, tmp in development
-const isElectron = process.versions && process.versions.electron;
-const uploadDir = isElectron
-  ? process.env.APPDATA
-    ? `${process.env.APPDATA}/ip-dropper/uploads` // Windows
-    : process.platform === "darwin"
-    ? `${process.env.HOME}/Library/Application Support/ip-dropper/uploads` // macOS
-    : `${process.env.HOME}/.config/ip-dropper/uploads` // Linux
-  : "/tmp/ip-dropper-uploads";
+const uploadDir = "/tmp/ip-dropper-uploads";
 
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });

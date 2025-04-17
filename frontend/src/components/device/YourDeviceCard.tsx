@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react"; // Added useCallback
 import { DeviceType } from "../../types/device";
 import "../../styles/YourDeviceCard.css";
 import { API_BASE_URL } from "../../constants/api";
 import { detectClientInfo, getDeviceIcon } from "./deviceUtils";
 import NetworkInterfacesModal from "./NetworkInterfacesModal";
-import { useRefreshRate } from "../../hooks/useRefreshRate";
+import { useRefreshRate } from "../../hooks/useRefreshRate"; // Import the hook
 
 interface NetworkInterface {
   name: string;
@@ -15,7 +15,9 @@ interface NetworkInterface {
 
 function YourDeviceCard() {
   const [deviceName, setDeviceName] = useState<string>("Loading...");
-  const [deviceType, setDeviceType] = useState<DeviceType | "loading">("loading");
+  const [deviceType, setDeviceType] = useState<DeviceType | "loading">(
+    "loading"
+  );
   const [interfaces, setInterfaces] = useState<NetworkInterface[]>([]);
   const [showModal, setShowModal] = useState(false);
   const refreshRate = useRefreshRate();
@@ -39,7 +41,7 @@ function YourDeviceCard() {
       setInterfaces(data.interfaces || []);
     } catch (error) {
       console.error("Error fetching device info:", error);
-      
+      // Fallback to client-side detection if API fails
       const { deviceType: detectedType, deviceName: detectedName } =
         detectClientInfo();
       setDeviceType(detectedType);
@@ -53,15 +55,11 @@ function YourDeviceCard() {
     const intervalId = setInterval(fetchDeviceInfo, refreshRate);
 
     return () => clearInterval(intervalId);
-
   }, [fetchDeviceInfo, refreshRate]);
 
   return (
     <>
-      <div 
-        className="your-device-card"
-        onClick={() => setShowModal(true)}
-      >
+      <div className="your-device-card" onClick={() => setShowModal(true)}>
         <div className="device-icon">
           <i className={`fab ${getDeviceIcon(deviceType)}`}></i>
         </div>

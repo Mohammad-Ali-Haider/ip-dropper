@@ -2,58 +2,18 @@
   "name": "ip-dropper",
   "private": true,
   "version": "1.0.0",
-  "main": "electron/main.js",
   "workspaces": [
     "frontend",
     "backend"
   ],
   "scripts": {
-    "start": "electron .",
-    "build": "npm run build -w frontend && npm run build -w backend && electron-builder",
-    "dev": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\" \"electron .\"",
-    "dev:web": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
-    "postinstall": "electron-builder install-app-deps"
-  },
-  "build": {
-    "appId": "com.ipdropper.app",
-    "productName": "IP Dropper",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "electron/**/*",
-      "frontend/dist/**/*",
-      "backend/dist/**/*",
-      "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
-      "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
-      "!**/node_modules/*.d.ts",
-      "!**/node_modules/.bin",
-      "!**/*.{iml,o,hprof,orig,pyc,pyo,rbc,swp,csproj,sln,xproj}",
-      "!.editorconfig",
-      "!**/._*",
-      "!**/{.DS_Store,.git,.hg,.svn,CVS,RCS,SCCS,.gitignore,.gitattributes}",
-      "!**/{__pycache__,thumbs.db,.flowconfig,.idea,.vs,.nyc_output}",
-      "!**/{appveyor.yml,.travis.yml,circle.yml}",
-      "!**/{npm-debug.log,yarn.lock,.yarn-integrity,.yarn-metadata.json}"
-    ],
-    "win": {
-      "icon": "frontend/public/logo.png",
-      "target": ["nsis"]
-    },
-    "mac": {
-      "icon": "frontend/public/logo.png",
-      "target": ["dmg"]
-    },
-    "linux": {
-      "icon": "frontend/public/logo.png",
-      "target": ["AppImage", "deb"]
-    }
+    "start": "cross-env NODE_ENV=production concurrently \"npm run start -w frontend\" \"npm run start -w backend\"",
+    "build": "npm run build -w frontend && npm run build -w backend",
+    "dev": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\""
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "cross-env": "^7.0.3",
-    "electron": "^28.0.0",
-    "electron-builder": "^24.0.0"
+    "cross-env": "^7.0.3"
   },
   "dependencies": {
     "ping": "^0.4.4"

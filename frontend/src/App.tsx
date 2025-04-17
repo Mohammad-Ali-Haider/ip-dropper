@@ -12,6 +12,16 @@ import "./styles/markdown.css";
 import "./styles/shared.css";
 import "./styles/Modal.css";
 
+/**
+ * Root component of the application.
+ * Manages the application's main layout, theme, and websocket connection.
+ *
+ * Features:
+ * - Persists active tab and receiving state in localStorage
+ * - Manages WebSocket connection for file transfer functionality
+ * - Handles theme provider wrapper
+ * - Controls main layout with sidebar and content area
+ */
 import IncomingFilesModal from "./components/modals/IncomingFilesModal";
 
 function App() {
@@ -67,6 +77,7 @@ function App() {
     setShowIncomingModal(false);
   };
 
+  // Initialize active tab from localStorage, defaulting to 0
   const [activeTab, setActiveTab] = useState(() =>
     JSON.parse(localStorage.getItem("app.activeTab") ?? "0")
   );
@@ -75,6 +86,7 @@ function App() {
 
   const [isReceiving, setIsReceiving] = useReceiving();
 
+  // Establish WebSocket connection on mount
   useEffect(() => {
     websocketService.setOnFileAvailable((file) => {
       setIncomingFiles((prev) => [
@@ -95,6 +107,7 @@ function App() {
     return () => websocketService.disconnect();
   }, []);
 
+  // Persist active tab changes to localStorage
   useEffect(() => {
     localStorage.setItem("app.activeTab", JSON.stringify(activeTab));
   }, [activeTab]);

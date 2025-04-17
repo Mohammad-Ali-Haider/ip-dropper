@@ -1,6 +1,6 @@
 # IP Dropper
 
-IP Dropper is a cross-platform desktop application that allows seamless file transfer and device management over a local network. It combines a **React** frontend, a **Node.js/Express** backend, and an **Electron** wrapper to provide a smooth user experience on the desktop.
+IP Dropper is a cross-platform desktop application that allows seamless file transfer and device management over a local network. It combines a **React** frontend, a **Node.js/Express** backend.
 
 ![IP Dropper](frontend/public/logo.png)
 
@@ -34,18 +34,10 @@ IP Dropper is a cross-platform desktop application that allows seamless file tra
 - Handles device management, file transfer endpoints, and network operations
 - Contains controllers, routes, services, and utility modules
 
-### Electron
-
-- Located in `/electron`
-- Wraps the frontend and backend into a single desktop application
-- Manages the app lifecycle and native OS integration
-- Provides cross-platform compatibility
-
 ## Technologies Used
 
 - **Frontend:** React 19, TypeScript, Vite 6, Bootstrap 5
 - **Backend:** Node.js, Express.js, WebSockets (ws)
-- **Desktop:** Electron
 - **Styling:** Bootstrap, CSS Modules, Custom Glassy UI Components
 - **Package Management:** npm with Workspaces
 - **Version Control:** Git
@@ -82,20 +74,14 @@ At the root of the project, run:
 npm install
 ```
 
-This installs all necessary dependencies for the frontend, backend, and Electron app using npm workspaces.
+This installs all necessary dependencies for the frontend, and backend using npm workspaces.
 
 ### 3. Run the Application
 
-To start the Electron app with both frontend and backend:
+To start the app with both frontend and backend:
 
 ```bash
 npm run dev
-```
-
-Or to run the web version only (without Electron):
-
-```bash
-npm run dev:web
 ```
 
 ## Project Structure
@@ -120,8 +106,6 @@ root/
 │   │   └── types/        # TypeScript type definitions
 │   ├── public/           # Static assets
 │   └── package.json
-├── electron/         # Electron main process code
-│   └── main.js           # Electron entry point
 ├── package.json      # Root package.json with scripts and dependencies
 └── README.md         # This file
 ```

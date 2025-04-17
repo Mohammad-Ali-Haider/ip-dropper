@@ -16,6 +16,7 @@
   "homepage": "https://github.com/Mohammad-Ali-Haider/ip-dropper#readme",
   "scripts": {
     "dev": "vite",
+    "start": "vite preview --port 5173",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
