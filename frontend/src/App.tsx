@@ -103,12 +103,10 @@ function App() {
         import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
       console.log("API Base URL:", apiBaseUrl);
 
-      // Show a message to the user
+      // Log the number of files being downloaded
       const totalFiles = incomingFiles.length;
       if (totalFiles > 1) {
-        alert(
-          `Downloading ${totalFiles} files. Please allow multiple downloads in your browser.`
-        );
+        console.log(`Downloading ${totalFiles} files sequentially`);
       }
 
       // Create a copy of the files array to avoid issues with state updates during download
