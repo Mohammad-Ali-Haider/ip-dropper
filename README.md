@@ -121,6 +121,23 @@ root/
 7. **Accept incoming transfers** on the receiving device when prompted
 8. **View transfer history** in the History tab
 
+## Firewall Configuration
+
+### Windows Defender Firewall
+
+On Windows, you may need to configure Windows Defender Firewall to allow IP Dropper to communicate over your network:
+
+1. **Allow through Firewall**: When prompted by Windows Security, click "Allow access" to permit IP Dropper through the firewall
+2. **Manual Configuration**: If not prompted or if transfers fail:
+   - Open Windows Defender
+   - Click "Allow an app or feature through Windows Defender Firewall"
+   - Click "Change settings" (requires administrator privileges)
+   - Find IP Dropper in the list or click "Allow another app" to add it
+   - **Important**: Make sure both "Private" and "Public" networks are checked
+   - Click "OK" to save changes
+
+> **Note**: Allowing the application through both Private and Public networks is essential for proper functionality, especially when connecting to devices on different network profiles.
+
 ## UI Features
 
 - **Glassy Modern Design:** Translucent UI elements with subtle blur effects
