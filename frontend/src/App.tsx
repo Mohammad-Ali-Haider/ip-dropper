@@ -30,7 +30,7 @@ function App() {
   >([]);
   const [showIncomingModal, setShowIncomingModal] = useState(false);
 
-  const handleAccept = (file: {
+  const handleAccept = async (file: {
     fileName: string;
     fileSize: number;
     downloadUrl: string;
@@ -94,7 +94,7 @@ function App() {
     if (incomingFiles.length === 1) setShowIncomingModal(false);
   };
 
-  const handleAcceptAll = () => {
+  const handleAcceptAll = async () => {
     try {
       console.log("Accept All clicked for files:", incomingFiles);
 
@@ -103,11 +103,30 @@ function App() {
         import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
       console.log("API Base URL:", apiBaseUrl);
 
-      incomingFiles.forEach((file) => {
+      // Show a message to the user
+      const totalFiles = incomingFiles.length;
+      if (totalFiles > 1) {
+        alert(
+          `Downloading ${totalFiles} files. Please allow multiple downloads in your browser.`
+        );
+      }
+
+      // Create a copy of the files array to avoid issues with state updates during download
+      const filesToDownload = [...incomingFiles];
+
+      // Download files with a delay between each to avoid browser blocking
+      for (let i = 0; i < filesToDownload.length; i++) {
+        const file = filesToDownload[i];
+
         // Ensure the download URL starts with a slash if it's a relative path
         const downloadPath = file.downloadUrl.startsWith("/")
           ? file.downloadUrl
           : `/${file.downloadUrl}`;
+        console.log(
+          `Downloading file ${i + 1}/${filesToDownload.length}: ${
+            file.fileName
+          }`
+        );
         console.log("Download path:", downloadPath);
 
         // Construct the full URL
@@ -132,9 +151,14 @@ function App() {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-      });
 
-      // Update state
+        // Add a small delay between downloads to avoid browser blocking
+        if (i < filesToDownload.length - 1) {
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+
+      // Update state after all downloads have been initiated
       setIncomingFiles([]);
       setShowIncomingModal(false);
     } catch (error: any) {
