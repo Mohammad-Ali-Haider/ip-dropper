@@ -129,12 +129,9 @@ On Windows, you may need to configure Windows Defender Firewall to allow IP Drop
 
 1. **Allow through Firewall**: When prompted by Windows Security, click "Allow access" to permit IP Dropper through the firewall
 2. **Manual Configuration**: If not prompted or if transfers fail:
-   - Open Windows Defender
-   - Click "Allow an app or feature through Windows Defender Firewall"
-   - Click "Change settings" (requires administrator privileges)
-   - Find IP Dropper in the list or click "Allow another app" to add it
-   - **Important**: Make sure both "Private" and "Public" networks are checked
-   - Click "OK" to save changes
+   - Open Windows Security
+   - Goto Firewall & network protection
+   - Turn off firewall for private network and public network
 
 > **Note**: Allowing the application through both Private and Public networks is essential for proper functionality, especially when connecting to devices on different network profiles.
 
