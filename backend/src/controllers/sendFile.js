@@ -1,4 +1,3 @@
-
 /**
  * File transfer controller for sending files to target devices
  * @module controllers/sendFile

@@ -35,17 +35,52 @@ function App() {
     fileSize: number;
     downloadUrl: string;
   }) => {
-    const link = document.createElement("a");
-    link.href = file.downloadUrl;
-    link.download = file.fileName;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    try {
+      console.log("Accept clicked for file:", file);
 
-    setIncomingFiles((prev) =>
-      prev.filter((f) => f.downloadUrl !== file.downloadUrl)
-    );
-    if (incomingFiles.length === 1) setShowIncomingModal(false);
+      // Get the API base URL from environment or use default localhost
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      console.log("API Base URL:", apiBaseUrl);
+
+      // Ensure the download URL starts with a slash if it's a relative path
+      const downloadPath = file.downloadUrl.startsWith("/")
+        ? file.downloadUrl
+        : `/${file.downloadUrl}`;
+      console.log("Download path:", downloadPath);
+
+      // Construct the full URL
+      let fullUrl = "";
+      if (apiBaseUrl.endsWith("/") && downloadPath.startsWith("/")) {
+        // Avoid double slashes
+        fullUrl = `${apiBaseUrl}${downloadPath.substring(1)}`;
+      } else if (!apiBaseUrl.endsWith("/") && !downloadPath.startsWith("/")) {
+        // Add slash if missing
+        fullUrl = `${apiBaseUrl}/${downloadPath}`;
+      } else {
+        // Normal case
+        fullUrl = `${apiBaseUrl}${downloadPath}`;
+      }
+
+      console.log("Full download URL:", fullUrl);
+
+      // Create and click the download link
+      const link = document.createElement("a");
+      link.href = fullUrl;
+      link.download = file.fileName;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Update state
+      setIncomingFiles((prev) =>
+        prev.filter((f) => f.downloadUrl !== file.downloadUrl)
+      );
+      if (incomingFiles.length === 1) setShowIncomingModal(false);
+    } catch (error: any) {
+      console.error("Error downloading file:", error);
+      alert(`Error downloading file: ${error.message || "Unknown error"}`);
+    }
   };
 
   const handleReject = (file: {
@@ -60,16 +95,52 @@ function App() {
   };
 
   const handleAcceptAll = () => {
-    incomingFiles.forEach((file) => {
-      const link = document.createElement("a");
-      link.href = file.downloadUrl;
-      link.download = file.fileName;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-    setIncomingFiles([]);
-    setShowIncomingModal(false);
+    try {
+      console.log("Accept All clicked for files:", incomingFiles);
+
+      // Get the API base URL from environment or use default localhost
+      const apiBaseUrl =
+        import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+      console.log("API Base URL:", apiBaseUrl);
+
+      incomingFiles.forEach((file) => {
+        // Ensure the download URL starts with a slash if it's a relative path
+        const downloadPath = file.downloadUrl.startsWith("/")
+          ? file.downloadUrl
+          : `/${file.downloadUrl}`;
+        console.log("Download path:", downloadPath);
+
+        // Construct the full URL
+        let fullUrl = "";
+        if (apiBaseUrl.endsWith("/") && downloadPath.startsWith("/")) {
+          // Avoid double slashes
+          fullUrl = `${apiBaseUrl}${downloadPath.substring(1)}`;
+        } else if (!apiBaseUrl.endsWith("/") && !downloadPath.startsWith("/")) {
+          // Add slash if missing
+          fullUrl = `${apiBaseUrl}/${downloadPath}`;
+        } else {
+          // Normal case
+          fullUrl = `${apiBaseUrl}${downloadPath}`;
+        }
+
+        console.log("Full download URL:", fullUrl);
+
+        // Create and click the download link
+        const link = document.createElement("a");
+        link.href = fullUrl;
+        link.download = file.fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+
+      // Update state
+      setIncomingFiles([]);
+      setShowIncomingModal(false);
+    } catch (error: any) {
+      console.error("Error downloading files:", error);
+      alert(`Error downloading files: ${error.message || "Unknown error"}`);
+    }
   };
 
   const handleRejectAll = () => {
@@ -89,14 +160,13 @@ function App() {
   // Establish WebSocket connection on mount
   useEffect(() => {
     websocketService.setOnFileAvailable((file) => {
+      console.log("File available notification received:", file);
       setIncomingFiles((prev) => [
         ...prev,
         {
           fileName: file.fileName,
           fileSize: file.fileSize,
-          downloadUrl: `${import.meta.env.VITE_API_BASE_URL || ""}${
-            file.downloadUrl
-          }`,
+          downloadUrl: file.downloadUrl, // Store the relative URL, we'll construct the full URL when downloading
         },
       ]);
       setShowIncomingModal(true);
