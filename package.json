@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "start": "electron .",
-    "build": "npm run build -w frontend && electron-builder",
+    "build": "npm run build -w frontend && npm run build -w backend && electron-builder",
     "dev": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\" \"electron .\"",
     "dev:web": "cross-env NODE_ENV=development concurrently \"npm run dev -w frontend\" \"npm run dev -w backend\"",
     "postinstall": "electron-builder install-app-deps"
@@ -23,7 +23,7 @@
     "files": [
       "electron/**/*",
       "frontend/dist/**/*",
-      "backend/**/*",
+      "backend/dist/**/*",
       "!**/node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}",
       "!**/node_modules/*/{test,__tests__,tests,powered-test,example,examples}",
       "!**/node_modules/*.d.ts",

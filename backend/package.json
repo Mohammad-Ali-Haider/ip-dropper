@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon --ignore devices.json src/server.js",
-    "test-receiver": "node src/test/testReceiver.js"
+    "test-receiver": "node src/test/testReceiver.js",
+    "build": "mkdir -p dist && cp -r src package.json dist/"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -8,7 +8,9 @@ let backendProcess;
 
 function startBackend() {
   const isPackaged = app.isPackaged;
-  const backendSourceRelativePath = "backend/src/server.js";
+  const backendSourceRelativePath = app.isPackaged
+    ? "backend/dist/src/server.js"
+    : "backend/src/server.js";
 
   const backendPath = isPackaged
     ? path.join(app.getAppPath(), backendSourceRelativePath)

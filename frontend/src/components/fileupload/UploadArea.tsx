@@ -31,7 +31,6 @@ export const UploadArea = forwardRef<HTMLDivElement, UploadAreaProps>(
 
       const files = e.dataTransfer.files;
       if (files && files.length > 0) {
-        // Create a synthetic event to reuse onFileChange
         const dataTransfer = new DataTransfer();
         Array.from(files).forEach(file => dataTransfer.items.add(file));
 

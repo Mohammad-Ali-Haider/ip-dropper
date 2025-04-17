@@ -1,10 +1,10 @@
-import { useEffect, useState, useCallback } from "react"; // Added useCallback
+import { useEffect, useState, useCallback } from "react";
 import { DeviceType } from "../../types/device";
 import "../../styles/YourDeviceCard.css";
 import { API_BASE_URL } from "../../constants/api";
 import { detectClientInfo, getDeviceIcon } from "./deviceUtils";
 import NetworkInterfacesModal from "./NetworkInterfacesModal";
-import { useRefreshRate } from "../../hooks/useRefreshRate"; // Import the hook
+import { useRefreshRate } from "../../hooks/useRefreshRate";
 
 interface NetworkInterface {
   name: string;
@@ -39,7 +39,7 @@ function YourDeviceCard() {
       setInterfaces(data.interfaces || []);
     } catch (error) {
       console.error("Error fetching device info:", error);
-      // Fallback to client-side detection if API fails
+      
       const { deviceType: detectedType, deviceName: detectedName } =
         detectClientInfo();
       setDeviceType(detectedType);

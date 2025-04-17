@@ -22,7 +22,6 @@
   margin-bottom: 1rem;
 }
 
-/* History-specific styles */
 .item-right {
   display: flex;
   align-items: center;
@@ -64,19 +63,16 @@
   opacity: 1;
 }
 
-/* Move the click handler to the left side only */
 .item-left {
   cursor: pointer;
   flex: 1;
 }
 
-/* Remove the old status styles since we're not using them anymore */
 .status-completed,
 .status-failed {
   display: none;
 }
 
-/* Modal Styles */
 .history-detail-modal .modal-content {
   background-color: var(--card-bg);
   color: var(--text-color);

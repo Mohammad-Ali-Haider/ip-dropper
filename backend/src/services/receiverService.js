@@ -1,6 +1,5 @@
 import net from "net";
 import { WebSocket } from "ws";
-import express from "express";
 import { Readable } from "stream";
 
 // Default transfer port, can be overridden

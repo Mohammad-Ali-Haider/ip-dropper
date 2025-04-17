@@ -14,7 +14,6 @@ export interface DeviceFormData {
   // type: DeviceType;
 }
 
-// New interface for device status
 export interface DeviceStatus {
   isOnline: boolean;
 }

@@ -25,7 +25,7 @@ function BaseModal({
   centered = true,
   className = "",
   size = "lg",
-  fullscreen = false,
+  fullscreen = undefined,
 }: Props) {
   return (
     <Modal
@@ -34,7 +34,7 @@ function BaseModal({
       centered={centered}
       dialogClassName={className}
       size={size}
-      fullscreen={fullscreen}
+      fullscreen={fullscreen === false ? undefined : fullscreen}
       backdropClassName="modal-backdrop"
     >
       <Modal.Header closeButton>

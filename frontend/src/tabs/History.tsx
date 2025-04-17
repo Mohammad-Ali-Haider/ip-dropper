@@ -86,7 +86,7 @@ function History() {
       const parsed = saved ? JSON.parse(saved) : [];
       return parsed.map((record: any) => ({
         ...record,
-        id: record.id || `legacy-${new Date().getTime()}-${Math.random()}`,  // Ensure old records have IDs
+        id: record.id || `legacy-${new Date().getTime()}-${Math.random()}`,
         timestamp: new Date(record.timestamp)
       }));
     } catch (error) {
