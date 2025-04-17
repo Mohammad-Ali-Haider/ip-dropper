@@ -14,8 +14,7 @@ Built with modern web technologies:
 
 - **Frontend**: React, TypeScript, Vite
 - **Backend**: Node.js, Express.js
-- **Desktop**: Electron
-- **Styling**: Bootstrap, CSS Modules
+- **Styling**: Bootstrap, CSS
 - **Package Management**: npm
 
 ## Architecture
@@ -24,7 +23,6 @@ IP Dropper consists of three main components:
 
 - **Frontend**: React-based UI for user interaction
 - **Backend**: Express.js server handling file transfers and device management
-- **Electron**: Wrapper that bundles everything into a desktop application
 
 ## Contributing
 
@@ -39,4 +37,4 @@ We welcome contributions! Visit our GitHub repository to:
 
 For support or inquiries, reach out to us:
 
-- GitHub: [github.com/Mohammad-Ali-Haider/ip-dropper](https://github.com/Mohammad-Ali-Haider/ip-dropper)
+- GitHub: [github.com/Mohammad-Ali-Haider](https://github.com/Mohammad-Ali-Haider)
